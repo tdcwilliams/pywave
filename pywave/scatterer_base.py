@@ -1,10 +1,9 @@
 import numpy as np
-from matplotlib import image, pyplot as plt
-import json
+from matplotlib import pyplot as plt
 from celluloid import Camera
-from collections import defaultdict
 
 _ZI = np.complex(0, 1)
+
 
 class ScattererBase:
 

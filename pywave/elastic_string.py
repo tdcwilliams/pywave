@@ -1,3 +1,8 @@
+import numpy as np
+
+_ZI = np.complex(0, 1)
+
+
 class ElasticString:
     """ Properties of an elastic string """
 

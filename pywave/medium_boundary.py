@@ -1,3 +1,8 @@
+import numpy as np
+
+_ZI = np.complex(0, 1)
+
+
 class MediumBoundary(ScattererBase):
     
     def __init__(self, lhs, rhs, position=0):
