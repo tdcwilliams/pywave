@@ -7,7 +7,7 @@ from collections import defaultdict
 _ZI = np.complex(0, 1)
 
 class ScattererBase:
-    
+
     def __init__(self, media):
         """
         Base scatterer class.
