@@ -84,6 +84,7 @@ RUN pip install \
       shapely --no-binary shapely \
       sktime \
       sktime-dl \
-      xgboost
+      xgboost \
+      celluloid
 #RUN rm -rf /tmp/*
 WORKDIR /root
