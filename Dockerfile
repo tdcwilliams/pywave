@@ -1,6 +1,6 @@
-FROM ubuntu:bionic AS base
+FROM ubuntu:bionic
 ENV DEBIAN_FRONTEND=noninteractive \
-    PYTHONPATH=$PYTHONPATH:/ml-utils \
+    PYTHONPATH=$PYTHONPATH:/pywave \
     PYTHON_UNBUFFERED=1
 
 RUN apt-get update \
@@ -41,7 +41,6 @@ RUN apt-get update \
 && rm -rf /var/lib/apt/lists/*
 
 # Python packages
-FROM base AS python
 WORKDIR /tmp
 RUN wget https://bootstrap.pypa.io/get-pip.py \
 &&  python3 get-pip.py \
