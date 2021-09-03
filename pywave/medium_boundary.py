@@ -1,5 +1,7 @@
 import numpy as np
 
+from pywave.scatterer_base import ScattererBase
+
 _ZI = np.complex(0, 1)
 
 
