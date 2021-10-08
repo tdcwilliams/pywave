@@ -161,6 +161,29 @@ class ElasticString:
         u[b] += np.exp(_ZI*np.outer(x1 - xb, self.k)).dot(c1).flatten() # (nx,nk) x (nk,1) = (nx,1)
         return u
 
+
+    def get_power(self, a0, a1):
+        """
+        Determine the power input to a segment of string
+        Positive power input corresponds to energy travelling into
+        the plane with normal vector being the positive x axis (i.e 
+        the energy is travelling in the direction of the negative x axis)
+
+        Parameters:
+        -----------
+        a0 : numpy.ndarray
+            coeffients of the waves travelling to the right
+        a1 : numpy.ndarray
+            coeffients of the waves travelling to the left
+
+        Returns:
+        --------
+        power : float
+            power input from the right.
+        """
+        fac = .5*self.omega*self.k[0]*self.kappa
+        return fac*(np.abs(a1[0])**2 - np.abs(a0[0])**2)
+
     
     def get_new(self, xlim=None):
         """ get new class instance with same parameters but different spatial limits
