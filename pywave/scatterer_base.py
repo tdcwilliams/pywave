@@ -127,6 +127,40 @@ class ScattererBase:
             )
 
 
+    def test_power_input(self):
+        """
+        Test the net power input is zero. Checks both
+        when the wave is from the right or the left.
+        """
+        def simple_inputs(from_left):
+            nmed = len(self.media)
+            ip = np.zeros_like(self.media[0].k)
+            im = np.zeros_like(self.media[1].k)
+            if from_left:
+                ip[0] = 1
+            else:
+                im[0] = 1
+            return ip, im
+
+
+        def run_power_test(from_left):
+            # test power input to left and right hand strings is the same
+            ip, im = simple_inputs(from_left)
+            pp = [self.media[i].get_power(
+                    **self.get_solution_params(i, ip, im))
+                    for i in range(2)]
+            pmax = np.max(np.abs(pp))
+            print(f'Test power input, from_left={from_left}:')
+            print(f'\t{pp[0]}, {pp[1]}')
+            if pmax > 0:
+                assert(np.abs(pp[1] - pp[0])/pmax < 1e-8)
+            print('\tOK')# NB if pmax=0, both must be zero and are therefore equal
+
+
+        for from_left in [True, False]:
+            run_power_test(from_left)
+
+
     def test_energy(self):
         """
         Test energy is conserved
