@@ -6,7 +6,7 @@ _ZI = np.complex(0, 1)
 class ElasticString:
     """ Properties of an elastic string """
 
-    def __init__(self, m=1, kappa=4, period=3, xlim = None):
+    def __init__(self, m=1, kappa=4, period=3, xlim=None):
         """
         Class to manage string properties
         
@@ -25,44 +25,10 @@ class ElasticString:
         self.m = m
         self.kappa = kappa
         self.period = period
-        self.infinite = False
-        self.semi_infinite = False
-        if xlim is None or tuple(xlim) == (-np.Inf, np.Inf):
-            self.infinite = True
-            self.xlim = np.array([-np.Inf, np.Inf])
-        else:
-            self.xlim = np.array(xlim)
-            self.semi_infinite = not np.all(np.isfinite(xlim))
-        assert(self.xlim[0] < self.xlim[1])
-        assert(len(self.xlim) == 2)
+        self.solve_disprel()
+        self.set_limits(xlim)
 
 
-    @property
-    def params(self):
-        """ return the main parameters (not position)
-        
-        Returns:
-        --------
-        params : dict
-        """
-        return dict(
-            m=self.m,
-            kappa=self.kappa,
-            period=self.period,
-        )
-
-
-    @property
-    def c(self):
-        """
-        Returns:
-        --------
-        c : float
-            wave speed (m/s)
-        """
-        return np.sqrt(self.kappa/self.m)
-    
-    
     @property
     def omega(self):
         """
@@ -73,18 +39,6 @@ class ElasticString:
             = 2\pi/period
         """
         return 2*np.pi/self.period # 1/s
-
-
-    @property
-    def k(self):
-        """
-        Returns:
-        --------
-        k : numpy.array(float)
-            wave frequency (1/m)
-            = 2\pi/wavelength
-        """
-        return np.array([self.omega/self.c])
 
     
     @property
@@ -110,8 +64,68 @@ class ElasticString:
         width = self.xlim[1] - self.xlim[0]
         if np.isfinite(width):
             return np.diag(np.exp(_ZI*width*self.k))
+
+
+    def solve_disprel(self):
+        """
+        Solve dispersion relation and set the wave number vector
+
+        Sets:
+        --------
+        k : numpy.ndarray(float)
+            vector of wave numbers (1/m)
+              = 2\pi/[wavelength]
+              = [omega/c]
+            where
+            c = sqrt(kappa/m) is the phase velocity
+        """
+        c = np.sqrt(self.kappa/self.m)
+        self.k = np.array([self.omega/c])
+
+
+    def set_limits(self, xlim):
+        """
+        Set limits of domain and characterise as semi-infinite/infinite/finite
+
+        Sets:
+        -----
+        infinite : bool
+        semi_infinite : bool
+        xlim : numpy.ndarray(float)
+        """
+        self.infinite = False
+        self.semi_infinite = False
+        if xlim is None or tuple(xlim) == (-np.Inf, np.Inf):
+            self.infinite = True
+            self.xlim = np.array([-np.Inf, np.Inf])
+        else:
+            self.xlim = np.array(xlim)
+            self.semi_infinite = not np.all(np.isfinite(xlim))
+        assert(self.xlim[0] < self.xlim[1])
+        assert(len(self.xlim) == 2)
         
     
+    def get_new(self, xlim=None):
+        """ get new class instance with same parameters but different spatial limits
+        
+        Parameters:
+        -----------
+        xlim : tuple(float)
+            (x0, x1)
+            
+        Returns:
+        --------
+        new : new instance of same type as self
+            copy of self but with different xlim
+        """
+        new = self.__new__(self.__class__)
+        for k,v in self.__dict__.items():
+            if k != 'xlim':
+                setattr(new, k, v)
+        new.set_limits(xlim)
+        return new
+    
+
     def is_in_domain(self, x):
         """
         Parameters:
@@ -183,18 +197,3 @@ class ElasticString:
         """
         fac = .5*self.omega*self.k[0]*self.kappa
         return fac*(np.abs(a1[0])**2 - np.abs(a0[0])**2)
-
-    
-    def get_new(self, xlim=None):
-        """ get new class instance with same parameters but different spatial limits
-        
-        Parameters:
-        -----------
-        xlim : tuple(float)
-            (x0, x1)
-            
-        Returns:
-        --------
-        new : new instance of same type as self
-        """
-        return self.__class__(**self.params, xlim=xlim)
