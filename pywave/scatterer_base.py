@@ -142,20 +142,16 @@ class ScattererBase:
                 im[0] = 1
             return ip, im
 
-
         def run_power_test(from_left):
             # test power input to left and right hand strings is the same
             ip, im = simple_inputs(from_left)
-            pp = [self.media[i].get_power(
+            pl, pr = [self.media[i].get_power(
                     **self.get_solution_params(i, ip, im))
                     for i in range(2)]
-            pmax = np.max(np.abs(pp))
             print(f'Test power input, from_left={from_left}:')
-            print(f'\t{pp[0]}, {pp[1]}')
-            if pmax > 0:
-                assert(np.abs(pp[1] - pp[0])/pmax < 1e-8)
-            print('\tOK')# NB if pmax=0, both must be zero and are therefore equal
-
+            print(f'\t{pl}, {pr}')
+            assert(np.allclose([pl], [pr]))
+            print('\tOK' )
 
         for from_left in [True, False]:
             run_power_test(from_left)
