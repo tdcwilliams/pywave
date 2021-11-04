@@ -18,10 +18,7 @@ class WaveMedium(Medium):
             default is (-numpy.Inf, numpy.Inf)
         """
         self.period = period
-        self.set_limits(xlim)
-        self.solve_disprel()
-        self.set_operators()
-        self.set_edge_operators()
+        super().__init(xlim=xlim)
 
 
     @property
