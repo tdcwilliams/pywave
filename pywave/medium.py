@@ -6,7 +6,7 @@ _ZI = np.complex(0, 1)
 class Medium:
     """ Properties of an elastic string """
 
-    def __init__(self, period=10, xlim=None):
+    def __init__(self, xlim=None):
         """
         Class for a general wave medium
         
@@ -23,18 +23,6 @@ class Medium:
         self.set_edge_operators()
 
 
-    @property
-    def omega(self):
-        """
-        Returns:
-        --------
-        omega : float
-            radial wave frequency (1/s)
-            = 2\pi/period
-        """
-        return 2*np.pi/self.period # 1/s
-
-    
     @property
     def num_modes(self):
         """
