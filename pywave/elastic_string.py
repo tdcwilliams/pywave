@@ -3,7 +3,7 @@ import numpy as np
 _ZI = np.complex(0, 1)
 
 
-class ElasticString:
+class ElasticString(Medium):
     """ Properties of an elastic string """
 
     def __init__(self, m=1, kappa=4, period=3, xlim=None):
@@ -24,46 +24,7 @@ class ElasticString:
         """
         self.m = m
         self.kappa = kappa
-        self.period = period
-        self.solve_disprel()
-        self.set_limits(xlim)
-
-
-    @property
-    def omega(self):
-        """
-        Returns:
-        --------
-        omega : float
-            radial wave frequency (1/s)
-            = 2\pi/period
-        """
-        return 2*np.pi/self.period # 1/s
-
-    
-    @property
-    def num_modes(self):
-        """
-        Returns:
-        --------
-        num_modes : int
-            number of wave modes
-        """
-        return len(self.k)
-
-    
-    @property
-    def phase_matrix(self):
-        """
-        Returns:
-        --------
-        phases : numpy.ndarray
-            vector with n-th element e^{i self.k[n] w} where w is the width and self.k
-            is the vector of wave numbers
-        """
-        width = self.xlim[1] - self.xlim[0]
-        if np.isfinite(width):
-            return np.diag(np.exp(_ZI*width*self.k))
+        super().__init__(period=period, xlim=xlim)
 
 
     def solve_disprel(self):
@@ -81,64 +42,6 @@ class ElasticString:
         """
         c = np.sqrt(self.kappa/self.m)
         self.k = np.array([self.omega/c])
-
-
-    def set_limits(self, xlim):
-        """
-        Set limits of domain and characterise as semi-infinite/infinite/finite
-
-        Sets:
-        -----
-        infinite : bool
-        semi_infinite : bool
-        xlim : numpy.ndarray(float)
-        """
-        self.infinite = False
-        self.semi_infinite = False
-        if xlim is None or tuple(xlim) == (-np.Inf, np.Inf):
-            self.infinite = True
-            self.xlim = np.array([-np.Inf, np.Inf])
-        else:
-            self.xlim = np.array(xlim)
-            self.semi_infinite = not np.all(np.isfinite(xlim))
-        assert(self.xlim[0] < self.xlim[1])
-        assert(len(self.xlim) == 2)
-        
-    
-    def get_new(self, xlim=None):
-        """ get new class instance with same parameters but different spatial limits
-        
-        Parameters:
-        -----------
-        xlim : tuple(float)
-            (x0, x1)
-            
-        Returns:
-        --------
-        new : new instance of same type as self
-            copy of self but with different xlim
-        """
-        new = self.__new__(self.__class__)
-        for k,v in self.__dict__.items():
-            if k != 'xlim':
-                setattr(new, k, v)
-        new.set_limits(xlim)
-        return new
-    
-
-    def is_in_domain(self, x):
-        """
-        Parameters:
-        -----------
-        x : numpy.array(float)
-        
-        Returns:
-        --------
-        in_dom : numpy.array(bool)
-            bool same size as x marking which members are in the domain
-        """
-        x0, x1 = self.xlim
-        return (x>=x0) * (x<=x1)
 
     
     def get_expansion(self, x, a0, a1, get_disp=True):
