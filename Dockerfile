@@ -32,10 +32,14 @@ RUN apt-get update \
       libxi-dev  \
       libxmu-dev \
       libxvidcore-dev \
+      pandoc \
       pkg-config \
       python3-dev \
       python3-tk \
       python-imaging-tk \
+      texlive \
+      texlive-extra \
+      texlive-xetex \
       unzip \
       wget \
 && rm -rf /var/lib/apt/lists/*
