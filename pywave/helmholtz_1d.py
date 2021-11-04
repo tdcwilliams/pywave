@@ -1,14 +1,16 @@
 import numpy as np
+from pywave.medium import Medium
 
 _ZI = np.complex(0, 1)
 
 
-class ElasticString(Medium):
+class Helmholtz1d(Medium):
     """ Properties of an elastic string """
 
-    def __init__(self, m=1, kappa=4, period=3, xlim=None):
+    def __init__(self, kappa=1, alpha=1, xlim=None):
         """
-        Class to manage string properties
+        Class to manage medium that satisfies Helmoltz equation in 1D
+        kappa*u_{xx} + alpha*u = 0
         
         Parameters:
         -----------
@@ -22,9 +24,9 @@ class ElasticString(Medium):
             (x0, x1), where x0 is the LHS limit and x1 si the RHS limit
             default is (-numpy.Inf, numpy.Inf)
         """
-        self.m = m
+        self.alpha = alpha
         self.kappa = kappa
-        super().__init__(period=period, xlim=xlim)
+        super().__init__(xlim=xlim)
 
 
     def solve_disprel(self):
@@ -35,13 +37,10 @@ class ElasticString(Medium):
         --------
         k : numpy.ndarray(float)
             vector of wave numbers (1/m)
-              = 2\pi/[wavelength]
-              = [omega/c]
-            where
-            c = sqrt(kappa/m) is the phase velocity
+            satisfies
+                alpha - kappa*k^2 = 0
         """
-        c = np.sqrt(self.kappa/self.m)
-        self.k = np.array([self.omega/c])
+        self.k = np.array([np.sqrt(self.alpha/self.kappa)])
 
     
     def get_expansion(self, x, a0, a1, get_disp=True):
