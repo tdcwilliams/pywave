@@ -1,14 +1,16 @@
 import numpy as np
+from pywave.helmholtz_1d import Helmholtz1d
 
 _ZI = np.complex(0, 1)
 
 
-class ElasticString(Medium):
+class ElasticString(Helmholtz1d, WaveMedium):
     """ Properties of an elastic string """
 
     def __init__(self, m=1, kappa=4, period=3, xlim=None):
         """
         Class to manage string properties
+        kappa*u_{xx} - m*u_tt = 0
         
         Parameters:
         -----------
@@ -23,27 +25,12 @@ class ElasticString(Medium):
             default is (-numpy.Inf, numpy.Inf)
         """
         self.m = m
-        self.kappa = kappa
-        super().__init__(period=period, xlim=xlim)
+        self.period = period
+        # periodic => kappa*u_xx + m*omega^2*u = 0
+        Helmholtz1d.__init__(self, kappa=kappa,
+                alpha=self.m*self.omega**2, xlim=xlim)
 
 
-    def solve_disprel(self):
-        """
-        Solve dispersion relation and set the wave number vector
-
-        Sets:
-        --------
-        k : numpy.ndarray(float)
-            vector of wave numbers (1/m)
-              = 2\pi/[wavelength]
-              = [omega/c]
-            where
-            c = sqrt(kappa/m) is the phase velocity
-        """
-        c = np.sqrt(self.kappa/self.m)
-        self.k = np.array([self.omega/c])
-
-    
     def get_expansion(self, x, a0, a1, get_disp=True):
         """
         Calculate a displacement profile
