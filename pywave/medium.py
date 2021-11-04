@@ -4,7 +4,13 @@ _ZI = np.complex(0, 1)
 
 
 class Medium:
-    """ Properties of an elastic string """
+    """
+    Properties of a general medium
+    - usually a wave problem solved in the frequency domain
+
+    Handles things like x range, eigenfunction expansion,
+    edge conditions.
+    """
 
     def __init__(self, xlim=None):
         """
@@ -16,7 +22,6 @@ class Medium:
             (x0, x1), where x0 is the LHS limit and x1 si the RHS limit
             default is (-numpy.Inf, numpy.Inf)
         """
-        self.period = period
         self.set_limits(xlim)
         self.solve_disprel()
         self.set_operators()
