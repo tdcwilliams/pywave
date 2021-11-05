@@ -106,21 +106,19 @@ class MediumBoundary(ScattererBase):
         for name in names_common:
             for n, med in enumerate(self.media):
                 # sort the operators
-                med_factor = -1 ** n
+                med_factor = pow(-1, n)
                 ops = med.edge_operators[name]
                 is_continuous = self.condition_types[n][name]
                 if is_continuous:
                     for j, op in enumerate(ops):
-                        r_mat = med_factor*op(-med_factor*med.k)
-                        r_for = -med_factor*op(med_factor*med.k)
-                        matrix[n_eqns+j,slices[n]] = r_mat
-                        forcing[n_eqns+j,slices[n]] = r_for
+                        matrix[n_eqns+j,slices[n]] = (
+                                med_factor*op(-med_factor*med.k))
+                        forcing[n_eqns+j,slices[n]] = (
+                                -med_factor*op(med_factor*med.k))
                 else:
                     op1 = ops[0]
-                    r_mat = op1(-med_factor*med.k)
-                    r_for = -op1(med_factor*med.k)
-                    matrix[n_eqns+n,slices[n]] = r_mat
-                    forcing[n_eqns+n,slices[n]] = r_for
+                    matrix[n_eqns+n,slices[n]] = op1(-med_factor*med.k)
+                    forcing[n_eqns+n,slices[n]] = -op1(med_factor*med.k)
             n_eqns += 2
 
         # operators that are not common
@@ -129,10 +127,8 @@ class MediumBoundary(ScattererBase):
             med_factor = -1 ** n
             for name in names_diff[n]:
                 op1 = med.edge_operators[name][0]
-                r_mat = op1(-med_factor*med.k)
-                r_for = -op1(med_factor*med.k)
-                matrix[num_eqns+n,slices[n]] = r_mat
-                forcing[n_eqns+n,slices[n]] = r_for
+                matrix[num_eqns+n,slices[n]] = op1(-med_factor*med.k)
+                forcing[n_eqns+n,slices[n]] = -op1(med_factor*med.k)
                 n_eqns += 1
 
         assert(n_eqns==nrows)
@@ -161,10 +157,10 @@ class MediumBoundary(ScattererBase):
 
         # sort result
         nk0 = len(self.media[0].k)
-        self.Rp_ = unknowns[:nk0, :nk0] #reflected to left
-        self.Tm_ = unknowns[:nk0, nk0:] #transmitted from right
-        self.Tp_ = unknowns[nk0:, :nk0] #transmitted from left
-        self.Rm_ = unknowns[nk0:, nk0:] #reflected from right
+        self.Rp = unknowns[:nk0, :nk0] #reflected to left
+        self.Tm = unknowns[:nk0, nk0:] #transmitted from right
+        self.Tp = unknowns[nk0:, :nk0] #transmitted from left
+        self.Rm = unknowns[nk0:, nk0:] #reflected from right
 
 
     def test_boundary_conditions(self, inc_amps=None):
