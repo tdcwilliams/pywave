@@ -42,6 +42,39 @@ class Helmholtz1d(Medium):
         """
         self.k = np.array([np.sqrt(self.alpha/self.kappa)])
 
+
+    def set_operators(self):
+        """
+        Set some operators for convenience
+
+        Sets:
+        -----
+        self.operators : dict
+        """
+        self.operators = dict(
+                displacement=lambda k : 1,
+                stress=lambda k : self.kappa*(_ZI*k),
+                )
+
+
+    def set_edge_operators(self):
+        """
+        Set edge operators to be used in the edge conditions
+
+        Sets:
+        -----
+        self.edge_operators : dict
+            keys are strings (names)
+            values are tuples
+            (op1,op2)
+        """
+        self.edge_operators = dict(
+                displacement=(
+                    self.operators['stress'],
+                    self.operators['displacement'],
+                    )
+                )
+
     
     def get_expansion(self, x, a0, a1, get_disp=True):
         """

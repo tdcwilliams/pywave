@@ -7,7 +7,7 @@ _ZI = np.complex(0, 1)
 
 class MediumBoundary(ScattererBase):
     
-    def __init__(self, lhs, rhs, position=0):
+    def __init__(self, lhs, rhs, position=0, condition_types=None):
         """
         Base scatterer class.
         Default calculates the scattering by a change in properties
@@ -26,6 +26,7 @@ class MediumBoundary(ScattererBase):
             lhs.get_new(xlim=(-np.Inf, position)),
             rhs.get_new(xlim=(position, np.Inf)),
             ])
+        self.set_condition_types(condition_types=condition_types)
 
 
     def sort_edge_operators(self):
@@ -65,18 +66,17 @@ class MediumBoundary(ScattererBase):
             default is operators common to the 2 media should be continuous
             and others should be zero
         """
+        names_common, _ = self.sort_edge_operators()
         if condition_types is not None:
             assert(len(condition_types)==2)
             for med, ct in zip(self.media, condition_types):
-                assert(list(ct) == list(med.edge_operators))
+                assert(list(ct) == names_common)
             self.condition_types = condition_types
             return
-        names_common, _ = self.sort_edge_operators()
-        if condition_types is None:
-            condition_types = []
-            for med in self.media:
-                condition_types += [{name : (name in names_common)
-                    for name in med.edge_operators}]
+        self.condition_types = []
+        for med in self.media:
+            self.condition_types += [{name : True
+                for name in med.edge_operators}]
 
 
     def assemble(self):
@@ -96,18 +96,19 @@ class MediumBoundary(ScattererBase):
         # num unknowns
         nk0, nk1 = [len(med.k) for med in self.media]
         ncols = nk0 + nk1
-        matrix = np.zeros((nrows,ncols))
-        forcing = np.zeros((nrows,ncols))
+        matrix = np.zeros((nrows,ncols), dtype=np.complex)
+        forcing = np.zeros((nrows,ncols), dtype=np.complex)
         slices = [slice(None, nk0), slice(nk0, None)]
         n_eqns = 0
 
         # common operators first
+        # - may be continuous or zero
         for name in names_common:
             for n, med in enumerate(self.media):
                 # sort the operators
                 med_factor = -1 ** n
-                op1, op2 = med.edge_operators[name]
-                is_continuous = condition_types[n][name]
+                ops = med.edge_operators[name]
+                is_continuous = self.condition_types[n][name]
                 if is_continuous:
                     for j, op in enumerate(ops):
                         r_mat = med_factor*op(-med_factor*med.k)
@@ -115,6 +116,7 @@ class MediumBoundary(ScattererBase):
                         matrix[n_eqns+j,slices[n]] = r_mat
                         forcing[n_eqns+j,slices[n]] = r_for
                 else:
+                    op1 = ops[0]
                     r_mat = op1(-med_factor*med.k)
                     r_for = -op1(med_factor*med.k)
                     matrix[n_eqns+n,slices[n]] = r_mat
@@ -122,10 +124,11 @@ class MediumBoundary(ScattererBase):
             n_eqns += 2
 
         # operators that are not common
+        # - must be zero
         for n, med in enumerate(self.media):
             med_factor = -1 ** n
             for name in names_diff[n]:
-                op1, = med.edge_operators[name]
+                op1 = med.edge_operators[name][0]
                 r_mat = op1(-med_factor*med.k)
                 r_for = -op1(med_factor*med.k)
                 matrix[num_eqns+n,slices[n]] = r_mat

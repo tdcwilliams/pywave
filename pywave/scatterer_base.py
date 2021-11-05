@@ -142,6 +142,7 @@ class ScattererBase:
                 im[0] = 1
             return ip, im
 
+
         def run_power_test(from_left):
             # test power input to left and right hand strings is the same
             ip, im = simple_inputs(from_left)
