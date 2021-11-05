@@ -1,6 +1,6 @@
-from pywave.helmholtz_1d import Helmholtz1d
+from pywave.helmholtz_1d import Helmholtz1D
 
-class ShallowWater(Helmholtz1d):
+class ShallowWater(Helmholtz1D):
     """ Class for scattering of linear shallow water waves """
 
     def __init__(self, rho_water=1025, depth=100, period=20, gravity=9.81, xlim=None):

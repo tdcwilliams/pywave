@@ -1,10 +1,10 @@
 import numpy as np
-from pywave.helmholtz_1d import Helmholtz1d
+from pywave.helmholtz_1d import Helmholtz1D
 
 _ZI = np.complex(0, 1)
 
 
-class ElasticString(Helmholtz1d):
+class ElasticString(Helmholtz1D):
     """ Properties of an elastic string """
 
     def __init__(self, m=1, kappa=4, period=3, xlim=None):

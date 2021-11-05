@@ -4,7 +4,7 @@ from pywave.medium import Medium
 _ZI = np.complex(0, 1)
 
 
-class Helmholtz1d(Medium):
+class Helmholtz1D(Medium):
     """ Properties of an elastic string """
 
     def __init__(self, kappa=1, alpha=1, xlim=None):
