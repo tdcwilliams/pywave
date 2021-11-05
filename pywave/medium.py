@@ -28,6 +28,57 @@ class Medium:
         self.set_edge_operators()
 
 
+    def set_limits(self, xlim):
+        """
+        Set limits of domain and characterise as semi-infinite/infinite/finite
+
+        Sets:
+        -----
+        infinite : bool
+        semi_infinite : bool
+        xlim : numpy.ndarray(float)
+        """
+        self.infinite = False
+        self.semi_infinite = False
+        if xlim is None or tuple(xlim) == (-np.Inf, np.Inf):
+            self.infinite = True
+            self.xlim = np.array([-np.Inf, np.Inf])
+        else:
+            self.xlim = np.array(xlim)
+            self.semi_infinite = not np.all(np.isfinite(xlim))
+        assert(self.xlim[0] < self.xlim[1])
+        assert(len(self.xlim) == 2)
+        
+    
+    def solve_disprel(self):
+        raise NotImplementedError(
+                "solve_disprel should be implemented in child class")
+
+
+    def set_operators(self):
+        raise NotImplementedError(
+                "set_operators should be implemented in child class")
+
+
+    def set_edge_operators(self):
+        raise NotImplementedError(
+                "set_edge_operators should be implemented in child class")
+
+
+    @property
+    def omega(self):
+        """
+        Return omega (only works if self.period is defined)
+
+        Returns:
+        --------
+        omega : float
+            radial wave frequency (1/s)
+            = 2\pi/period
+        """
+        return 2*np.pi/self.period # 1/s
+
+
     @property
     def num_modes(self):
         """
@@ -53,28 +104,6 @@ class Medium:
             return np.diag(np.exp(_ZI*width*self.k))
 
 
-    def set_limits(self, xlim):
-        """
-        Set limits of domain and characterise as semi-infinite/infinite/finite
-
-        Sets:
-        -----
-        infinite : bool
-        semi_infinite : bool
-        xlim : numpy.ndarray(float)
-        """
-        self.infinite = False
-        self.semi_infinite = False
-        if xlim is None or tuple(xlim) == (-np.Inf, np.Inf):
-            self.infinite = True
-            self.xlim = np.array([-np.Inf, np.Inf])
-        else:
-            self.xlim = np.array(xlim)
-            self.semi_infinite = not np.all(np.isfinite(xlim))
-        assert(self.xlim[0] < self.xlim[1])
-        assert(len(self.xlim) == 2)
-        
-    
     def get_new(self, xlim=None):
         """ get new class instance with same parameters but different spatial limits
         
@@ -123,8 +152,10 @@ class Medium:
             wave amplitudes for waves travelling from left to right
         a1 : numpy.array(float)
             wave amplitudes for waves travelling from right to left
-        operator : lambda
-            differential operator to apply as a function of \partial/(\partial x)
+        operator : str or function
+            operator to apply as a function of wave number k
+            if a string is used, operator is taken from the dict self.operators
+            defined in self.set_operators of child class
 
         Returns:
         --------
@@ -141,24 +172,14 @@ class Medium:
             x0 = x1 = self.xlim[np.isfinite(self.xlim)]
         if operator is None:
             operator = lambda x : 1
-        c0 = a0 * operator( _ZI*self.k)
-        c1 = a1 * operator(-_ZI*self.k)
+        elif isinstance(operator, str):
+            operator = self.operators[operator]
+        c0 = a0 * operator(self.k)
+        c1 = a1 * operator(-self.k)
         # (nx,nk) x (nk,1) = (nx,1)
         u[b] = np.exp(_ZI*np.outer(xb - x0, self.k)).dot(c0).flatten()
         u[b] += np.exp(_ZI*np.outer(x1 - xb, self.k)).dot(c1).flatten()
         return u
-
-
-    def solve_disprel(self):
-        pass
-
-
-    def set_operators(self):
-        pass
-
-
-    def set_edge_operators(self):
-        pass
 
 
     def get_matrices_forcings_1op(self, op, on_left):
@@ -178,7 +199,7 @@ class Medium:
         return matrices, forcings
 
 
-    def get_matrices_forcings_1pair(self, name, on_left, is_continuous)
+    def get_matrices_forcings_1pair(self, name, on_left, is_continuous):
         matrices = []
         forcings = []
         op1, op2 = self.edge_operators[name]

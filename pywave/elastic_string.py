@@ -4,7 +4,7 @@ from pywave.helmholtz_1d import Helmholtz1d
 _ZI = np.complex(0, 1)
 
 
-class ElasticString(Helmholtz1d, WaveMedium):
+class ElasticString(Helmholtz1d):
     """ Properties of an elastic string """
 
     def __init__(self, m=1, kappa=4, period=3, xlim=None):
@@ -27,8 +27,8 @@ class ElasticString(Helmholtz1d, WaveMedium):
         self.m = m
         self.period = period
         # periodic => kappa*u_xx + m*omega^2*u = 0
-        Helmholtz1d.__init__(self, kappa=kappa,
-                alpha=self.m*self.omega**2, xlim=xlim)
+        super().__init__(
+                kappa=kappa, alpha=self.m*self.omega**2, xlim=xlim)
 
 
     def get_expansion(self, x, a0, a1, get_disp=True):
