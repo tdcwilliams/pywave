@@ -5,7 +5,7 @@ from pywave.medium_boundary import MediumBoundary
 _ZI = np.complex(0, 1)
 
 
-class ElasticStringBoundary(MediumBoundary):
+class Helmholtz1DBoundary(MediumBoundary):
     
     def solve(self):
         """
