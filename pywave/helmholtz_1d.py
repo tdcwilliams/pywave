@@ -35,7 +35,7 @@ class Helmholtz1D(Medium):
 
         Sets:
         --------
-        k : numpy.ndarray(float)
+        self.k : numpy.ndarray(float)
             vector of wave numbers (1/m)
             satisfies
                 alpha - kappa*k^2 = 0
@@ -52,8 +52,8 @@ class Helmholtz1D(Medium):
         self.operators : dict
         """
         self.operators = dict(
-                displacement=lambda k : 1,
-                stress=lambda k : self.kappa*(_ZI*k),
+                helmholtz_u=lambda k : 1,
+                helmholtz_Kux=lambda k : _ZI*self.kappa*k,
                 )
 
 
@@ -70,8 +70,8 @@ class Helmholtz1D(Medium):
         """
         self.edge_operators = dict(
                 displacement=(
-                    self.operators['stress'],
-                    self.operators['displacement'],
+                    self.operators['helmholtz_Kux'],
+                    self.operators['helmholtz_u'],
                     )
                 )
 
