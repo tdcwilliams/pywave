@@ -51,18 +51,41 @@ class Medium:
         
     
     def solve_disprel(self):
+        """
+        solve dispersion relation
+        Needs to be defined in child classes
+
+        Sets:
+        --------
+        self.k : numpy.ndarray(float)
+            vector of wave numbers (1/m)
+            satisfies
+                alpha - kappa*k^2 = 0
+        """
         raise NotImplementedError(
                 "solve_disprel should be implemented in child class")
 
 
     def set_operators(self):
-        raise NotImplementedError(
-                "set_operators should be implemented in child class")
+        """
+        set common operators for convenience or to be used by Medium.set_edge_operators
+
+        Sets:
+        -----
+        self.operators
+        """
+        self.operators = {}
 
 
     def set_edge_operators(self):
-        raise NotImplementedError(
-                "set_edge_operators should be implemented in child class")
+        """
+        set edge operators to be used by Medium.solve
+
+        Sets:
+        -----
+        self.edge_operators
+        """
+        self.edge_operators = {}
 
 
     @property
