@@ -31,6 +31,19 @@ class ElasticString(Helmholtz1D):
                 kappa=kappa, alpha=self.m*self.omega**2, xlim=xlim)
 
 
+    def set_operators(self):
+        """
+        Set some operators for convenience
+
+        Sets:
+        -----
+        self.operators : dict
+        """
+        super().set_operators()
+        self.operators['displacement'] = lambda k : 1
+        self.operators['stress'] = self.operators['helmholtz_Kux']
+
+
     def get_expansion(self, x, a0, a1, get_disp=True):
         """
         Calculate a displacement profile
