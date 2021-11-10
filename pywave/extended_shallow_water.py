@@ -8,6 +8,11 @@ class ExtendedShallowWater(Helmholtz1D):
 
     def __init__(self, rho_water=1025, depth=100, period=20, gravity=9.81, xlim=None):
         """
+        Solves Helmholtz equation
+        0 = beta*q_xx + (alpha/h)*q
+          = beta*(q_xx + (alpha/(h*beta))*q)
+        k = sqrt(alpha/(h*beta))
+
         Parameters:
         -----------
         rho_water : float
@@ -26,9 +31,9 @@ class ExtendedShallowWater(Helmholtz1D):
         self.rho_water = rho_water
         self.depth = depth
         self.gravity = gravity
-        kow = self.omega**2/g
-        super().__init__(kappa=self.beta,
-                alpha=self.wave_number_ow_id/self.depth, xlim=xlim)
+        super().__init__(helmholtz_coef=self.beta,
+                k = np.sqrt(self.wave_number_ow_id/(self.beta*self.depth)),
+                xlim=xlim)
 
 
     @property
