@@ -22,8 +22,8 @@ class Helmholtz1DBoundary(MediumBoundary):
         Tm_ : numpy.ndarray(float)
             T^- matrix (transmission of waves to left)
         """
-        kk0 = self.media[0].k[0]*self.media[0].kappa
-        kk1 = self.media[1].k[0]*self.media[1].kappa
+        kk0 = self.media[0].k[0]*self.media[0].helmholtz_coef
+        kk1 = self.media[1].k[0]*self.media[1].helmholtz_coef
         fac = 1/(kk0 + kk1)
         self.Rp = fac*np.array([[kk0-kk1]])
         self.Tm = fac*np.array([[2*kk1]])
@@ -42,8 +42,8 @@ class Helmholtz1DBoundary(MediumBoundary):
         sm = self.get_solution_params(-1, ip, im)['a0']
         u_m = ip.sum() + sp.sum() #U(0^-)
         u_p = im.sum() + sm.sum() #U(0^+)
-        sig_m = _ZI*self.media[0].kappa*self.media[0].k.dot(ip - sp)
-        sig_p = _ZI*self.media[-1].kappa*self.media[-1].k.dot(sm - im)
+        sig_m = _ZI*self.media[0].helmholtz_coef*self.media[0].k.dot(ip - sp)
+        sig_p = _ZI*self.media[-1].helmholtz_coef*self.media[-1].k.dot(sm - im)
         print(f"u(0) = {u_m} = {u_p}")
         print(f"\sigma(0) = {sig_m} = {sig_p}")
         assert(np.abs(u_m - u_p) < 1e-8)
