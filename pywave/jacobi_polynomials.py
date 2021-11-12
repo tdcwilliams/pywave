@@ -1,3 +1,8 @@
+import numpy as np
+from scipy.special import roots_jacobi
+from scipy.special import gamma
+
+
 class JacobiPolynomials:
     
     """
@@ -118,7 +123,7 @@ class JacobiPolynomials:
         '''
         x, w, hm = self.quad_points_weights()
         pn = self.get_polys(x)
-        mat = p.diag(1/hm).dot(pn.T)
+        mat = np.diag(1/hm).dot(pn.T)
         return mat.dot(np.diag(w))
  
         
