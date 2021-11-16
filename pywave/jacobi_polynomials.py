@@ -47,7 +47,8 @@ class JacobiPolynomials:
         Returns:
         --------
         h : numpy.ndarray
-            norms of the poynomials ie the integrals h[n] = \int_a^b{w(x)P_n^2(t)dx}
+            norms of the poynomials ie the integrals
+            h[n] = \int_{-1}^1{w(x)P_n^2(t)dt}
         """
         hm = np.zeros((self.max_degree + 1,))
         hm[0] = (pow(2, self.alpha + self.beta + 1)
@@ -101,7 +102,8 @@ class JacobiPolynomials:
             weights of the Gaussian quadrature scheme
             w.dot(f)[n] = \int_a^b{w(x)P_n^2(t)dx}
         h : numpy.ndarray
-            norms of the poynomials ie the integrals h[n] = \int_a^b{w(x)P_n^2(t)dx}
+            norms of the poynomials ie the integrals
+            h[n] = \int_a^b{w(x)P_n^2(t)dx}
         """
         t, w = roots_jacobi(self.max_degree + 1, self.alpha, self.beta)
         m = (self.b - self.a)/2
@@ -110,7 +112,7 @@ class JacobiPolynomials:
         return self.a + m * (1+t), fac * w, fac * hm
 
 
-    def get_inner_product_matrix(self):
+    def get_inner_product_matrix(self, xwh=None):
         '''
         evaluate polys at quad points
         
@@ -121,13 +123,15 @@ class JacobiPolynomials:
             jacobi quadrature points, and fn is the vector of coefficients in
             the expansion in Jacobi polynomials
         '''
-        x, w, hm = self.quad_points_weights()
+        if xwh is None:
+            xwh = self.quad_points_weights()
+        x, w, hm = xwh
         pn = self.get_polys(x)
         mat = np.diag(1/hm).dot(pn.T)
         return mat.dot(np.diag(w))
  
         
-    def get_coeffs(self, f):
+    def get_coeffs(self, f, xwh=None):
         '''
         Parameters:
         -----------
@@ -139,7 +143,9 @@ class JacobiPolynomials:
         fn : numpy.ndarray
             fn is the vector of coefficients in the expansion in Jacobi polynomials
         '''
-        x, w, hm = self.quad_points_weights()
+        if xwh is None:
+            xwh = self.quad_points_weights()
+        x, w, hm = xwh
         pn = self.get_polys(x)
         mat = np.diag(1/hm).dot(pn.T)
         return mat.dot(w*f)
