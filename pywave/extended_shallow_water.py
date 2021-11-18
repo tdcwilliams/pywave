@@ -1,12 +1,14 @@
+import numpy as np
 from pywave.helmholtz_1d import Helmholtz1D
 
-class ExtendedShallowWater(Helmholtz1D):
+
+class ExtendedShallowWater(Helmholtz1D, OpenWaterBase):
     """
     Class for scattering of linear shallow water waves.
     Extended shallow water of Porter (2019)
     """
 
-    def __init__(self, rho_water=1025, depth=100, period=20, gravity=9.81, xlim=None):
+    def __init__(self, xlim=None, **kwargs)
         """
         Solves Helmholtz equation
         0 = beta*q_xx + (alpha/h)*q
@@ -27,10 +29,7 @@ class ExtendedShallowWater(Helmholtz1D):
             (x0, x1), where x0 is the LHS limit and x1 is the RHS limit
             default is (-numpy.Inf, numpy.Inf)
         """
-        self.period = period
-        self.rho_water = rho_water
-        self.depth = depth
-        self.gravity = gravity
+        OpenWaterBase.__init__(self, **kwargs)
         super().__init__(helmholtz_coef=self.beta,
                 k = np.sqrt(self.wave_number_ow_id/(self.beta*self.depth)),
                 xlim=xlim)
