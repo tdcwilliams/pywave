@@ -75,8 +75,8 @@ class JacobiPolynomials:
         polys : numpy.ndarray
             rows correspond to x values, columns to polynomial order
         '''
-        m = (self.b - self.a)/2
-        t = -1 + (x - self.a)/m
+        delta = (self.b - self.a)/2
+        t = -1 + (x - self.a)/delta
         polys = np.ones((len(t), self.max_degree + 1))
         if self.max_degree == 0:
             return
@@ -92,7 +92,7 @@ class JacobiPolynomials:
         return polys
 
 
-    def quad_points_weights(self):
+    def quad_points_weights(self, num_points=None):
         """
         Returns:
         --------
@@ -105,11 +105,16 @@ class JacobiPolynomials:
             norms of the poynomials ie the integrals
             h[n] = \int_a^b{w(x)P_n^2(t)dx}
         """
-        t, w = roots_jacobi(self.max_degree + 1, self.alpha, self.beta)
-        m = (self.b - self.a)/2
-        fac = pow(m, self.alpha + self.beta + 1)
+        if num_points is None:
+            # want to at least be able to integrate
+            # a poly of degree 2*self.max_degree
+            # - ok if num_points = self.max_degree + 1
+            num_points = self.max_degree + 1
+        t, w = roots_jacobi(num_points, self.alpha, self.beta)
+        delta = (self.b - self.a)/2
+        fac = pow(delta, self.alpha + self.beta + 1)
         hm = self.get_norms()
-        return self.a + m * (1+t), fac * w, fac * hm
+        return self.a + delta * (1+t), fac * w, fac * hm
 
 
     def get_inner_product_matrix(self, xwh=None):
@@ -162,8 +167,8 @@ class JacobiPolynomials:
         factors : numpy.ndarray
             factors to multiply coefficients by (see usage in get_derivatives)
         '''
-        m = (self.b - self.a)/2
-        factors = np.array([(0.5 / m) * (n + self.alpha + self.beta + 1)
+        delta = (self.b - self.a)/2
+        factors = np.array([(0.5 / delta) * (n + self.alpha + self.beta + 1)
                for n in range(1, self.max_degree + 1)])
         jp = JacobiPolynomials(alpha=self.alpha + 1, beta=self.beta + 1,
                                a=self.a, b=self.b, max_degree=self.max_degree - 1)
@@ -188,3 +193,80 @@ class JacobiPolynomials:
         dpn = np.zeros((len(x), self.max_degree +1))
         dpn[:, 1:self.max_degree + 1] = jp.get_polys(x).dot(np.diag(factors))
         return dpn
+
+
+    def num_quad_points_exp(self, kappa, z_int):
+        """
+        Estimate number of quadrature points to calculate
+        the inner product integrals with an exponential function.
+        Wavenumbers can be complex (combination of exponential decay and
+        oscillation)
+
+        Parameters:
+        -----------
+        kappa : numpy.ndarray(numpy.complex)
+            wavenumbers, length=nk
+        z_int : list(float)
+            [z0,z1]
+            z interval problem is defined on
+
+        Returns:
+        --------
+        num_points : int
+            recommended number of quadrature points
+        """
+        # 10 points per oscillation
+        ki = np.max(kappa.imag)
+        ni = 10*ki*(z1-z0)/(2*np.pi)
+        # 5 points per e-folding factor
+        kr = np.max(kappa.real)
+        nr = 5*ki*(z1-z0)
+        return np.max([ni,nr,self.max_degree+1])
+
+
+    def inner_prod_cosh_basis(self, kappa, z_int,
+            xwh=None, num_points=None):
+        """
+        inner products of Jacobi polynomials with 
+        cosh(kappa*(z-z0))/cosh(kappa*(z1-z0))
+
+        Parameters:
+        -----------
+        kappa : numpy.ndarray(numpy.complex)
+            wavenumbers, length=nk
+        z_int : list(float)
+            [z0,z1]
+            z interval problem is defined on
+        xwh : tuple
+            (x, w, h) with
+                x : numpy.ndarray
+                    Gaussian quadrature points
+                w : numpy.ndarray
+                    weights of the Gaussian quadrature scheme
+                    w.dot(f)[n] = \int_a^b{w(x)P_n^2(t)dx}
+                h : numpy.ndarray
+                    norms of the poynomials ie the integrals
+                    h[n] = \int_a^b{w(x)P_n^2(t)dx}
+        num_points : int
+            number of quadrature points to use in the integration
+
+        Returns:
+        --------
+        a_nk : numpy.ndarray
+            shape (nk, max_degree+1)
+            polynomial index in rows, wavenumber in columns
+        """
+        z0, z1 = z_int
+        if xwh is None:
+            if num_points is None:
+                num_points = self.num_quad_points_exp(kappa, z_int)
+                print(num_points)
+            xwh = self.quad_points_weights(num_points=num_points)
+        ipm = jp.get_inner_product_matrix(xwh=xwh)
+
+        z_ = xwh[0].reshape(-1,1)     # z in rows
+        k_ = kappa.reshape(1,-1) # kappa in cols
+        f = np.exp(-(z1-z_).dot(k_)) + np.exp(-(z_+z1-2*z0).dot(k_))
+        fac = 1 + np.exp(-2*k_*(z1-z0))
+        f = f.dot(np.diag(1/fac))
+        return ipm.dot(f)
