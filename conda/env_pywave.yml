@@ -1,0 +1,25 @@
+name: pywave
+channels:
+  - conda-forge
+dependencies:
+ - cython
+ - ipdb
+ - ipython
+ - jupyter
+ - matplotlib
+ - mock
+ - netcdf4
+ - netcdftime
+ - nose
+ - notebook
+ - numpy
+ - pandas
+ - pillow
+ - pyproj
+ - pyshp
+ - python=3.6
+ - pyyaml
+ - scikit-image
+ - scikit-learn
+ - scipy
+ - shapely
