@@ -1,5 +1,13 @@
 import numpy as np
 
+from pywave.energy_transport.lib import (
+        diffl,
+        diffr,
+        sumr,
+        vector_min,
+        vector_max,
+        )
+
 
 class Advect1D:
     
@@ -16,70 +24,6 @@ class Advect1D:
             'van_leer' : self.limiter_van_leer,
             'superbee' : self.limiter_superbee,
             }[limiter]
-
-
-    @staticmethod
-    def diffl(u):
-        d = np.zeros_like(u)
-        d[1:] = np.diff(u)
-        return d
-    
-        
-    @staticmethod
-    def diffr(u):
-        d = np.zeros_like(u)
-        d[:-1] = np.diff(u)
-        return d
-
-
-    @staticmethod
-    def suml(u):
-        s = np.zeros_like(u)
-        s[0] = 2*u[0]
-        s[1:] = u[1:] + u[:-1]
-        return s
-    
-        
-    @staticmethod
-    def sumr(u):
-        s = np.zeros_like(u)
-        s[:-1] = u[:-1] + u[1:]
-        s[-1] = 2*u[-1]
-        return s
-
-    
-    @staticmethod
-    def min(u, v):
-        """
-        min function that works for vectors as well as floats
-        
-        Parameters:
-        -----------
-        u : float or numpy.ndarray
-        v : float or numpy.ndarray
-        
-        Returns:
-        --------
-        min_uv : float or numpy.ndarray
-        """
-        return .5*(u+v - np.abs(u-v))
-
-
-    @staticmethod
-    def max(u, v):
-        """
-        max function that works for vectors as well as floats
-        
-        Parameters:
-        -----------
-        u : float or numpy.ndarray
-        v : float or numpy.ndarray
-        
-        Returns:
-        --------
-        max_uv : float or numpy.ndarray
-        """
-        return .5*(u+v + np.abs(u-v))
 
 
     def flux_fou(self, u, c):
@@ -117,7 +61,7 @@ class Advect1D:
         """
         r = self.dt/self.dx
         f = c*u
-        return .5*(self.sumr(f)-r*self.diffr(f))
+        return .5*(sumr(f)-r*diffr(f))
 
 
     def flux_lax_wendroff(self, u, c):
@@ -137,7 +81,7 @@ class Advect1D:
         """
         r = self.dt/self.dx
         f = c*u
-        return .5*( self.sumr(f) - c*r*self.diffr(f) )
+        return .5*( sumr(f) - c*r*diffr(f) )
 
 
     @staticmethod
@@ -172,8 +116,8 @@ class Advect1D:
             weighting for high-order flux
             - 1 means use high-order flux, 0 means use first-order upwind
         """
-        return self.max(0, self.max(
-            self.min(1, 2*theta), self.min(theta, 2)
+        return vector_max(0, vector_max(
+            vector_min(1, 2*theta), vector_min(theta, 2)
             ))
 
 
@@ -194,7 +138,7 @@ class Advect1D:
         --------
         flux : numpy.ndarray
         """
-        theta = self.diffl(u)/(self.diffr(u)+3.e-14)
+        theta = diffl(u)/(diffr(u)+3.e-14)
         phi = self.limiter(theta)
         return c*u + phi*(self.flux(u, c) - c*u)
  
@@ -216,4 +160,4 @@ class Advect1D:
             updated quantity
         """
         f  = self.limited_flux(u, c)
-        return (u - self.dt*self.diffl(f)/self.dx)
+        return (u - self.dt*diffl(f)/self.dx)
