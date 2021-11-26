@@ -136,5 +136,11 @@ class AdvectAtten1D(Advect1D):
         u_new : numpy.ndarray
             updated quantity
         """
-        f  = self.limited_flux(u, c)
+        # do we need to allow for negative velocity?
+        u_, c_, same_dirn = self.check_u_c(u, c)
+        if (not same_dirn) and isinstance(alpha, numpy.ndarray):
+            alpha_ = alpha[::-1]
+        else:
+            alpha_ = alpha
+        f  = self.limited_flux(u_, c_, alpha_)
         return (1-alpha*self.dt)*u - self.dt*diffl(f)/self.dx
