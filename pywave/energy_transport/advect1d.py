@@ -1,12 +1,8 @@
 import numpy as np
 
 from pywave.energy_transport.lib import (
-        diffl,
-        diffr,
-        sumr,
-        vector_min,
-        vector_max,
-        )
+        diffl, diffr, sumr)
+from pywave.energy_transport.flux_limiters import LIMITERS
 
 
 class Advect1D:
@@ -19,11 +15,7 @@ class Advect1D:
             'lax_friedrichs' : self.flux_lax_friedrichs,
             'lax_wendroff' : self.flux_lax_wendroff,
         }[scheme]
-        self.limiter = {
-            None : (lambda x : 1), # no limiting
-            'van_leer' : self.limiter_van_leer,
-            'superbee' : self.limiter_superbee,
-            }[limiter]
+        self.limiter = LIMITERS[limiter]
 
 
     def flux_fou(self, u, c):
@@ -84,44 +76,7 @@ class Advect1D:
         return .5*( sumr(f) - c*r*diffr(f) )
 
 
-    @staticmethod
-    def limiter_van_leer(theta):
-        """
-        van Leer flux limiter
-        
-        Parameters:
-        -----------
-        theta : numpy.ndarray
-        
-        Returns:
-        --------
-        phi : numpy.ndarray
-            weighting for high-order flux
-            - 1 means use high-order flux, 0 means use first-order upwind
-        """
-        return (theta + np.abs(theta))/(1 + np.abs(theta))
-    
- 
-    def limiter_superbee(self, theta):
-        """
-        Superbee flux limiter
-        
-        Parameters:
-        -----------
-        theta : numpy.ndarray
-        
-        Returns:
-        --------
-        phi : numpy.ndarray
-            weighting for high-order flux
-            - 1 means use high-order flux, 0 means use first-order upwind
-        """
-        return vector_max(0, vector_max(
-            vector_min(1, 2*theta), vector_min(theta, 2)
-            ))
-
-
-    def limited_flux(self, u, c):
+    def limited_flux(self, u, c, *args):
         """
         Return limited flux to prevent oscillations from high-order flux.
         The limiting can be deactivated by instantiating object with limiter=None
@@ -133,6 +88,7 @@ class Advect1D:
             quantity to be advected
         c : float or numpy.ndarray
             velocity
+        args for self.flux
         
         Returns:
         --------
@@ -140,10 +96,10 @@ class Advect1D:
         """
         theta = diffl(u)/(diffr(u)+3.e-14)
         phi = self.limiter(theta)
-        return c*u + phi*(self.flux(u, c) - c*u)
+        return c*u + phi*(self.flux(u, c, *args) - c*u)
  
 
-    def step(self, u, c, alpha):
+    def step(self, u, c):
         """
         Advect u for one time step.
         
