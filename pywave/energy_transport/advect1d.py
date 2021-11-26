@@ -18,7 +18,7 @@ class Advect1D:
         self.limiter = LIMITERS[limiter]
 
 
-    def flux_fou(self, u, c):
+    def flux_fou(self, u, c, *args):
         """
         flux for first order upwind
         
@@ -28,6 +28,7 @@ class Advect1D:
             quantity to be advected
         c : float or numpy.ndarray
             velocity
+        dummy args
         
         Returns:
         --------
@@ -36,7 +37,7 @@ class Advect1D:
         return c*u
 
 
-    def flux_lax_friedrichs(self, u, c):
+    def flux_lax_friedrichs(self, u, c, *args):
         """
         flux for Lax-Friedrichs - central diference, 1st order
         
@@ -46,6 +47,7 @@ class Advect1D:
             quantity to be advected
         c : float or numpy.ndarray
             velocity
+        dummy args
         
         Returns:
         --------
@@ -56,7 +58,7 @@ class Advect1D:
         return .5*(sumr(f)-r*diffr(f))
 
 
-    def flux_lax_wendroff(self, u, c):
+    def flux_lax_wendroff(self, u, c, *args):
         """
         flux for Lax-Wendroff - direct space-time, 2nd order
         
@@ -66,6 +68,7 @@ class Advect1D:
             quantity to be advected
         c : float or numpy.ndarray
             velocity
+        dummy args
         
         Returns:
         --------
@@ -99,7 +102,7 @@ class Advect1D:
         return c*u + phi*(self.flux(u, c, *args) - c*u)
  
 
-    def step(self, u, c):
+    def advect(self, u, c, *args):
         """
         Advect u for one time step.
         
@@ -115,5 +118,5 @@ class Advect1D:
         u_new : numpy.ndarray
             updated quantity
         """
-        f  = self.limited_flux(u, c)
+        f  = self.limited_flux(u, c, *args)
         return (u - self.dt*diffl(f)/self.dx)
