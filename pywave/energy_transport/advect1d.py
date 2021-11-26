@@ -100,6 +100,40 @@ class Advect1D:
         theta = diffl(u)/(diffr(u)+3.e-14)
         phi = self.limiter(theta)
         return c*u + phi*(self.flux(u, c, *args) - c*u)
+
+
+    def check_u_c(self, u, c):
+        """
+        Check if we need to allow for negative velocity
+        and return modified u,c to work in the different
+        flux schemes (defined for advection to right)
+
+        Parameters:
+        -----------
+        u : numpy.ndarray
+            quantity to be advected
+        c : float or numpy.ndarray
+            velocity
+
+        Returns:
+        -----------
+        u_tmp : numpy.ndarray
+            quantity to be advected
+        c_tmp : float or numpy.ndarray
+            velocity
+        same_dirn : bool
+            True if advecting to right
+        """
+        if isinstance(c, np.ndarray):
+            same_dirn = np.all(c>0)
+            if not same_dirn: c_ = -c[::-1]
+        else:
+            same_dirn = (c>0)
+            if not same_dirn: c_ = -c
+
+        if same_dirn:
+            return u, c, same_dirn
+        return u[::-1], c_, same_dirn
  
 
     def advect(self, u, c, *args):
@@ -118,20 +152,9 @@ class Advect1D:
         u_new : numpy.ndarray
             updated quantity
         """
-        # do we need to allow for negative velocity
-        if isinstance(c, np.ndarray):
-            same_dir = np.all(c>0)
-            if not same_dir: c_ = -c[::-1]
-        else:
-            same_dir = (c>0)
-            if not same_dir: c_ = -c
-
-        if same_dir:
-            s = slice(None, None, None)
-            u_ = u
-            c_ = c
-        else:
-            s = slice(None, None, -1)
-            u_ = u[s]
+        # do we need to allow for negative velocity?
+        u_, c_, same_dirn = self.check_u_c(u, c)
         f  = self.limited_flux(u_, c_, *args)
-        return (u_ - self.dt*diffl(f)/self.dx)[s]
+        u_ = u_ - self.dt*diffl(f)/self.dx
+        if same_dirn: return u_
+        return u_[::-1]
