@@ -1,5 +1,7 @@
 import numpy as np
 
+from pywave.energy_transport.lib import (
+        diffl, diffr, sumr)
 from pywave.energy_transport.advect1d import Advect1D
 
 
@@ -48,7 +50,7 @@ class AdvectAtten1D(Advect1D):
         """
         r = self.dt/self.dx
         f = c*u
-        return .5*( self.sumr(f)*(1-alpha*dt) - r*c*self.diffr(f) )
+        return .5*( sumr(f)*(1-alpha*self.dt) - r*c*diffr(f) )
 
 
     def flux_lax_wendroff_implicit(self, u, c, alpha):
@@ -69,7 +71,7 @@ class AdvectAtten1D(Advect1D):
         --------
         flux : numpy.ndarray
         """
-        return self.flux_lax_wendroff(u, c)/(1+alpha*dt)
+        return self.flux_lax_wendroff(u, c)/(1+alpha*self.dt)
 
 
     def adv_atten_split_step(self, u, c, alpha):
@@ -135,4 +137,4 @@ class AdvectAtten1D(Advect1D):
             updated quantity
         """
         f  = self.limited_flux(u, c)
-        return (1-alpha*self.dt)*u - self.dt*self.diffl(f)/self.dx
+        return (1-alpha*self.dt)*u - self.dt*diffl(f)/self.dx
