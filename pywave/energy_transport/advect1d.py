@@ -118,5 +118,20 @@ class Advect1D:
         u_new : numpy.ndarray
             updated quantity
         """
-        f  = self.limited_flux(u, c, *args)
-        return (u - self.dt*diffl(f)/self.dx)
+        # do we need to allow for negative velocity
+        if isinstance(c, np.ndarray):
+            same_dir = np.all(c>0)
+            if not same_dir: c_ = -c[::-1]
+        else:
+            same_dir = (c>0)
+            if not same_dir: c_ = -c
+
+        if same_dir:
+            s = slice(None, None, None)
+            u_ = u
+            c_ = c
+        else:
+            s = slice(None, None, -1)
+            u_ = u[s]
+        f  = self.limited_flux(u_, c_, *args)
+        return (u_ - self.dt*diffl(f)/self.dx)[s]
