@@ -6,12 +6,24 @@ from pywave.energy_transport.advect1d import Advect1D
 
 
 class EnergyTransfer2Dirns(Advect1D):
+    """ Class to manage energy transfer between 2 directions """
 
 
     def __init__(self, dx, dt,
+            unit_scat_source=None, aniso=True,
             scheme='lax_wendroff', limiter=None,
             flux_correction_scheme=None,
             u_correction_scheme="split_step"):
+        """
+        Parameters:
+        -----------
+        unit_scat_source : numpy.ndarray
+        aniso : bool
+        scheme : str
+        limiter : str
+        flux_correction_scheme : str
+        u_correction_scheme : str
+        """
 
         super().__init__(dx, dt, scheme=scheme, limiter=limiter)
         if scheme == "lax_wendroff":
@@ -23,78 +35,58 @@ class EnergyTransfer2Dirns(Advect1D):
         if u_correction_scheme == "split_step":
             # don't correct flux with alpha if using split step
             assert(flux_correction_scheme is None)
-        self.adv_atten = {
-                    "explicit" : self.adv_atten_explicit,
-                    "implicit" : self.adv_atten_implicit,
-                    "split_step" : self.adv_atten_split_step,
+        self.step = {
+                    "explicit" : self.step_explicit,
+                    "implicit" : self.step_implicit,
+                    "split_step" : self.step_split,
                     }[u_correction_scheme]
 
-        self.unit_source_matrix = np.array([[-1,-1],[1,1]])
+        if unit_scat_source is not None:
+            self.unit_scat_source = unit_scat_source
+        elif aniso:
+            self.unit_scat_source = np.array([[-1,-1],[1,1]])
+        else:
+            self.unit_scat_source = np.array([[-1,1],[1,-1]])
 
-    
-    def flux_lax_wendroff_explicit(self, u, c, alpha):
+
+    def get_source_matrix(self, alpha, gamma, shape):
         """
-        Flux for Lax-Wendroff - direct space-time, 2nd order.
-        Explicit correction for attenuation.
-        
+        Construct elements of the source matrix
+
         Parameters:
         -----------
-        u : numpy.ndarray
-            quantity to be advected
-        c : float or numpy.ndarray
-            velocity
         alpha : float or numpy.ndarray
-            attenuation coefficient
-        
+            scattering strength
+        gamma : float or numpy.ndarray
+            dissipative attenuation coefficient
+        shape : tuple
+            shape of outputs
+
         Returns:
         --------
-        flux : numpy.ndarray
+        a: numpy.ndarray
+            element (0,0) of source matrix
+        b: numpy.ndarray
+            element (0,1) of source matrix
+        c: numpy.ndarray
+            element (1,0) of source matrix
+        d: numpy.ndarray
+            element (1,1) of source matrix
         """
-        r = self.dt/self.dx
-        f = c*u
-        return .5*( sumr(f)*(1-alpha*self.dt) - r*c*diffr(f) )
+        # make alpha and gamma be arrays of the right shape
+        alp = (alpha if isinstance(alpha, numpy.ndarray)
+                else np.full(shape, alpha))
+        gam = (gamma if isinstance(gamma, numpy.ndarray)
+                else np.full(shape, gamma))
 
-
-    def flux_lax_wendroff_implicit(self, u, c, alpha):
-        """
-        Flux for Lax-Wendroff - direct space-time, 2nd order.
-        Implicit correction for attenuation.
-        
-        Parameters:
-        -----------
-        u : numpy.ndarray
-            quantity to be advected
-        c : float or numpy.ndarray
-            velocity
-        alpha : float or numpy.ndarray
-            attenuation coefficient
-        
-        Returns:
-        --------
-        flux : numpy.ndarray
-        """
-        return self.flux_lax_wendroff(u, c)/(1+alpha*self.dt)
-
-
-    def adv_atten_split_step(self, u, c, alpha):
-        """
-        Advect u for one time step.
-        
-        Parameters:
-        -----------
-        u : numpy.ndarray
-            quantity to be advected
-        c : float or numpy.ndarray
-            velocity
-        alpha : float or numpy.ndarray
-            attenuation coefficient
-        
-        Returns:
-        --------
-        u_new : numpy.ndarray
-            updated quantity
-        """
-        return self.advect(u, c)*np.exp(-alpha*self.dt)
+        # set the source matrix [[a,b],[c,d]]
+        a = (-gam*self.dt
+                + (alp*self.dt)*self.unit_scat_source[0,0])
+        b = (alp*self.dt)*self.unit_scat_source[0,1]
+        c = (-gam*self.dt
+                + (alp*self.dt)*self.unit_scat_source[1,1])
+        d = (alp*self.dt)*self.unit_scat_source[1,1]
+        return a, b, c, d
 
 
     def step_implicit(self, u, v, c, alpha, gamma):
@@ -111,19 +103,25 @@ class EnergyTransfer2Dirns(Advect1D):
         c : float or numpy.ndarray
             velocity
         alpha : float or numpy.ndarray
-            attenuation coefficient
+            scattering strength
+        gamma : float or numpy.ndarray
+            dissipative attenuation coefficient
         
         Returns:
         --------
         u_new : numpy.ndarray
-            updated quantity
+            updated quantity advected to right
+        v_new : numpy.ndarray
+            updated quantity advected to left
         """
         u_ = self.advect(u, c)
         v_ = self.advect(v, -c)
-        (a,b), (c,d) = (
-                (1+gamma*self.dt)*np.eye(2)
-                + (alpha*self.dt)*self.unit_source_matrix
-                )
+        # set the source matrix [[a,b],[c,d]]
+        a, b, c, d = self.get_source_matrix(alpha, gamma, u.shape)
+        # convert to the matrix to invert
+        # u^{n+1}, v^{n+1} = ...
+        #     + (a*u^{n+1} + b*v^{n+1}, c*u^{n+1} + d*v^{n+1})
+        a, b, c, d = 1-a, -b, -c, 1-d
         det = a*d - b*c
         return (d*u_ - b*v_)/det, (-c*u_ + a*v_)/det
 
@@ -147,7 +145,8 @@ class EnergyTransfer2Dirns(Advect1D):
         u_new : numpy.ndarray
             updated quantity
         """
-        (a,b), (c,d) = (alpha*self.dt)*self.unit_source_matrix
+        # set the source matrix [[a,b],[c,d]]
+        a, b, c, d = self.get_source_matrix(alpha, gamma, u.shape)
         return (
                 self.advect(u,  c) + a*u + b*v,
                 self.advect(v, -c) + c*u + d*v,
@@ -331,19 +330,8 @@ class EnergyTransfer2Dirns(Advect1D):
         u_ = self.advect(u, c)
         v_ = self.advect(v, -c)
 
-        # make alpha and gamma be arrays of the right shape
-        gam = (gamma if isinstance(gamma, numpy.ndarray)
-                else np.full_like(u, gamma))
-        alp = (alpha if isinstance(alpha, numpy.ndarray)
-                else np.full_like(u, alpha))
-
         # set the source matrix [[a,b],[c,d]]
-        a = (-gam*self.dt
-                + (alp*self.dt)*self.unit_source_matrix[0,0])
-        b = (alp*self.dt)*self.unit_source_matrix[0,1]
-        c = (-gam*self.dt
-                + (alp*self.dt)*self.unit_source_matrix[1,1])
-        d = (alp*self.dt)*self.unit_source_matrix[1,1]
+        a, b, c, d = self.get_source_matrix(alpha, gamma, u.shape)
         discr = (a+d)**2 + a*d-b*c
         assert(np.all(discr >= 0))
         lam_av = (a+d)/2 # average of the 2 eigenvalues
@@ -360,9 +348,9 @@ class EnergyTransfer2Dirns(Advect1D):
         # 2nd do unique eigenvalues
         use = (discr > 0)
         if np.any(use):
+            ab = (a[use], b[use])
             dlam = np.sqrt(discr[use])/2
             lams = [lam_av[use] + dlam, lam_av[use]-dlam]
-            ab = (a[use], b[use])
             u_new[use], v_new[use] = self.evolve_unique_evals(
                     u_[use], v_[use], lams, ab)
 
