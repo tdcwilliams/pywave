@@ -143,4 +143,7 @@ class AdvectAtten1D(Advect1D):
         else:
             alpha_ = alpha
         f  = self.limited_flux(u_, c_, alpha_)
-        return (1-alpha*self.dt)*u - self.dt*diffl(f)/self.dx
+        u_ = (1-alpha_*self.dt)*u_ - self.dt*diffl(f)/self.dx
+        if same_dirn:
+            return u_
+        return u_[::-1]
