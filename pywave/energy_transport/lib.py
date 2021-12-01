@@ -323,20 +323,20 @@ def solve_2d_ode_spectral(u0, v0, t, a, b, c, d):
     use = np.copy(diag)
     if np.any(use):
         ex = np.exp(t.reshape(-1,1).dot(a[use].reshape(1,-1)))
-        u_all[:,use] = ex.dot(u0[use].reshape(1,-1))
+        u_all[:,use] = ex.dot(np.diag(u0[use]))
         ex = np.exp(t.reshape(-1,1).dot(d[use].reshape(1,-1)))
-        v_all[:,use] = ex.dot(v0[use].reshape(1,-1))
+        v_all[:,use] = ex.dot(np.diag(v0[use]))
 
     # 2nd do repeated eigenvalues (both = lam_av)
     # - NB matrix is not a multiple of the identity
-    use = (discr == 0) * (not diag)
+    use = (discr == 0) * (~diag)
     if np.any(use):
         abcd = (a[use], b[use], c[use], d[use])
         u_all[:,use], v_all[:,use] = evolve_repeated_eval(
                 u0[use], v0[use], t, lam_av[use], abcd)
 
     # 3rd do unique eigenvalues
-    use = (discr > 0) * (not diag)
+    use = (discr > 0) * (~diag)
     if np.any(use):
         abcd = (a[use], b[use], c[use], d[use])
         dlam = np.sqrt(discr[use])/2
