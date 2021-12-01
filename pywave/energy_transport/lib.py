@@ -164,7 +164,7 @@ def get_evec_aux(lam, a, b, c, d):
     return ev0, ev1, aux0/h, aux1/h, h/rhs
 
 
-def evolve_unique_evals(u, v, t, lams, abcd):
+def evolve_unique_evals(u0, v0, t, lams, abcd):
     """
     Evolve ODE
     [du/dt, dv/dt] = [[a,b],[c,d]](u,v)
@@ -175,10 +175,12 @@ def evolve_unique_evals(u, v, t, lams, abcd):
 
     Parameters:
     -----------
-    u : numpy.ndarray
-        quantity to be advected to right
-    v : numpy.ndarray
-        quantity to be advected to left
+    u0 : numpy.ndarray
+        initial values of u
+    v0 : numpy.ndarray
+        initial values of v
+    t : numpy.ndarray
+        time values to evaluate the solution
     lams : list(numpy.ndarray)
         list of eigenvalues [lam1,lam2]
     abcd : tuple
@@ -199,23 +201,20 @@ def evolve_unique_evals(u, v, t, lams, abcd):
     v_new : numpy.ndarray
         updated quantity to be advected to left
     """
-    if isinstance(t, np.ndarray):
-        t_ = t.reshape(-1,1) # nt x 1
-    else:
-        t_ = np.array([[t]]) # nt x 1
-    shp = (len(t_),len(u))
+    t_ = t.reshape(-1,1) # nt x 1
+    shp = (len(t_),len(u0))
     u_new = np.zeros(shp)
     v_new = np.zeros(shp)
     for lam in lams:
         ev0, ev1 = get_evec(lam, *abcd)
-        coef = ev0*u + ev1*v
+        coef = ev0*u0 + ev1*v0
         ex = np.exp(t_.dot(lam.reshape(1,-1))) #nt x nx
-        u_new += ex * np.diag(coef*ev0)
-        v_new += ex * np.diag(coef*ev1)
+        u_new += ex.dot(np.diag(coef*ev0))
+        v_new += ex.dot(np.diag(coef*ev1))
     return u_new, v_new
 
 
-def evolve_repeated_eval(u, v, t, lam, abcd):
+def evolve_repeated_eval(u0, v0, t, lam, abcd):
     """
     Evolve ODE
     [du/dt, dv/dt] = [[a,b],[c,d]](u,v)
@@ -224,10 +223,12 @@ def evolve_repeated_eval(u, v, t, lam, abcd):
 
     Parameters:
     -----------
-    u : numpy.ndarray
-        quantity to be advected to right
-    v : numpy.ndarray
-        quantity to be advected to left
+    u0 : numpy.ndarray
+        initial values of u
+    v0 : numpy.ndarray
+        initial values of v
+    t : numpy.ndarray
+        time values to evaluate the solution
     lam : numpy.ndarray
         eigenvalue
     abcd : tuple
@@ -250,14 +251,14 @@ def evolve_repeated_eval(u, v, t, lam, abcd):
     """
 
     t_ = t.reshape(-1,1)
-    shp = (len(t),len(u))
+    shp = (len(t),len(u0))
     u_new = np.zeros(shp)
     v_new = np.zeros(shp)
     ev0, ev1, aux0, aux1, aux_fac = get_evec_aux(lam, *abcd)
 
     """ 1st solution: A*ev*exp(lam*t) """
     ex = np.exp(t.reshape(-1,1).dot(lam.reshape(1,-1)))
-    coef = u*ev0 + v*ev1
+    coef = u0*ev0 + v0*ev1
     u_new = ex.dot(np.diag(coef * ev0))
     v_new = ex.dot(np.diag(coef * ev1))
 
@@ -270,7 +271,7 @@ def evolve_repeated_eval(u, v, t, lam, abcd):
 
     Below, aux is unit vector, and aux_fac=1/h.
     """
-    coef = u*aux0 + v*aux1
+    coef = u0*aux0 + v0*aux1
     u_new += np.diag(t).dot(ex.dot(np.diag(coef*aux_fac*ev0)))
     v_new += np.diag(t).dot(ex.dot(np.diag(coef*aux_fac*ev1)))
     u_new += ex.dot(np.diag(coef*aux0))

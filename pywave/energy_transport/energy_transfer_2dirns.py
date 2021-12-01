@@ -79,12 +79,10 @@ class EnergyTransfer2Dirns(Advect1D):
                 else np.full(shape, gamma))
 
         # set the source matrix [[a,b],[c,d]]
-        a = (-gam*self.dt
-                + (alp*self.dt)*self.unit_scat_source[0,0])
-        b = (alp*self.dt)*self.unit_scat_source[0,1]
-        c = (-gam*self.dt
-                + (alp*self.dt)*self.unit_scat_source[1,1])
-        d = (alp*self.dt)*self.unit_scat_source[1,1]
+        a = alp*self.unit_scat_source[0,0] - gam
+        b = alp*self.unit_scat_source[0,1]
+        c = alp*self.unit_scat_source[1,0]
+        d = alp*self.unit_scat_source[1,1] - gam
         return a, b, c, d
 
 
