@@ -2,7 +2,6 @@ name: pywave
 channels:
   - conda-forge
 dependencies:
- - cython
  - ipdb
  - ipython
  - jupyter
@@ -15,11 +14,8 @@ dependencies:
  - numpy
  - pandas
  - pillow
- - pyproj
- - pyshp
  - python=3.6
  - pyyaml
  - scikit-image
  - scikit-learn
  - scipy
- - shapely

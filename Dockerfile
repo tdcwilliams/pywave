@@ -7,26 +7,14 @@ RUN apt-get update \
 &&  apt-get upgrade -y \
 &&  apt-get install -y \
       build-essential \
-      cmake \
-      g++-6 \
-      gcc-6 \
-      gfortran \
-      graphviz \
-      libatlas-base-dev \
+      ffmpeg \
       libavcodec-dev \
       libavformat-dev \
-      libgeos-dev \
-      libglu1-mesa  \
-      libglu1-mesa-dev \
       libgtk-3-dev \
       libjpeg-dev \
       libhdf5-serial-dev \
-      liblapack-dev \
-      libopenblas-dev \
       libpng-dev \
-      libproj-dev \
       libswscale-dev \
-      libtiff-dev \
       libv4l-dev \
       libx264-dev \
       libxi-dev  \
@@ -38,7 +26,7 @@ RUN apt-get update \
       python3-tk \
       python-imaging-tk \
       texlive \
-      texlive-extra \
+      texlive-latex-extra \
       texlive-xetex \
       unzip \
       wget \
@@ -50,45 +38,25 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
 &&  python3 get-pip.py \
 &&  pip install --upgrade pip
 RUN pip install \
-      beautifulsoup4 \
-      cirq \
-      graphviz \
-      imutils \
       jedi==0.17.2 \
       matplotlib \
       mock \
       nose \
       numpy \
-      opencv-contrib-python \
       pandas \
       pillow \
-      progressbar2 \
       proj \
-      pydotplus \
-      pyproj \
       pyyaml \
       scikit-image \
       scikit-learn \
-      seaborn \
-      shapely \
-      statsmodels \
-      torch==1.8 \
-      torchaudio \
-      torchvision \
-      qiskit
+      statsmodels
 RUN pip install \
-      cartopy \
-      cmocean \
-      fastai2 \
       ipython \
       jupyter \
       nc-time-axis \
       netCDF4 \
-      pytorch-forecasting \
       shapely --no-binary shapely \
-      sktime \
-      sktime-dl \
       xgboost \
       celluloid
-#RUN rm -rf /tmp/*
+RUN rm -rf /tmp/*
 WORKDIR /root
