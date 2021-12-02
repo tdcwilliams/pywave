@@ -3,13 +3,14 @@ import numpy as np
 from pywave.energy_transport.lib import (
         vector_min, vector_max)
 
-def limiter_van_leer(theta):
+def limiter_van_leer(r):
     """
     van Leer flux limiter
     
     Parameters:
     -----------
-    theta : numpy.ndarray
+    r : numpy.ndarray
+        ratio of rhs to lhs gradient
     
     Returns:
     --------
@@ -17,16 +18,17 @@ def limiter_van_leer(theta):
         weighting for high-order flux
         - 1 means use high-order flux, 0 means use first-order upwind
     """
-    return (theta + np.abs(theta))/(1 + np.abs(theta))
+    return (r + np.abs(r))/(1 + np.abs(r))
 
 
-def limiter_superbee(theta):
+def limiter_superbee(r):
     """
     Superbee flux limiter
     
     Parameters:
     -----------
-    theta : numpy.ndarray
+    r : numpy.ndarray
+        ratio of rhs to lhs gradient
     
     Returns:
     --------
@@ -35,7 +37,7 @@ def limiter_superbee(theta):
         - 1 means use high-order flux, 0 means use first-order upwind
     """
     return vector_max(0, vector_max(
-        vector_min(1, 2*theta), vector_min(theta, 2)
+        vector_min(1, 2*r), vector_min(r, 2)
         ))
 
 
