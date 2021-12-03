@@ -157,7 +157,7 @@ class EnergyTransfer2Dirns(Advect1D):
                 )
 
 
-    def step_split(self, u, v, c, alpha, gamma):
+    def step_split(self, u, v, ct, alpha, gamma):
         """
         Advect and attenuate u for one time step.
         Do attenuation explicitly.
@@ -168,8 +168,8 @@ class EnergyTransfer2Dirns(Advect1D):
             quantity to be advected to right
         v : numpy.ndarray
             quantity to be advected to left
-        c : float or numpy.ndarray
-            velocity
+        ct : float or numpy.ndarray
+            transport velocity
         alpha : float or numpy.ndarray
             scattering strength
         gamma : float or numpy.ndarray
@@ -182,8 +182,8 @@ class EnergyTransfer2Dirns(Advect1D):
         v_new : numpy.ndarray
             updated quantity to be advected to left
         """
-        u_ = self.advect(u, c)
-        v_ = self.advect(v, -c)
+        u_ = self.advect(u, ct)
+        v_ = self.advect(v, -ct)
 
         # set the source matrix [[a,b],[c,d]]
         a, b, c, d = self.get_source_matrix(alpha, gamma, u.shape)
