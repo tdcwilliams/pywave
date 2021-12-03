@@ -23,9 +23,6 @@ class EnergyTransfer2Dirns(Advect1D):
         """
 
         super().__init__(dx, dt, scheme=scheme, limiter=limiter)
-        if u_correction_scheme == "split_step":
-            # don't correct flux with alpha if using split step
-            assert(flux_correction_scheme is None)
         self.step = {
                     "explicit" : self.step_explicit,
                     "implicit" : self.step_implicit,
@@ -40,7 +37,7 @@ class EnergyTransfer2Dirns(Advect1D):
             self.unit_scat_source = np.array([[-1,1],[1,-1]])
 
 
-    def get_source_matrix(self, alpha, gamma, shape):
+    def get_source_matrix(self, alpha, gamma, shape=None):
         """
         Construct elements of the source matrix
 
