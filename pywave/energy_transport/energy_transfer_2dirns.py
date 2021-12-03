@@ -37,7 +37,8 @@ class EnergyTransfer2Dirns(Advect1D):
             self.unit_scat_source = np.array([[-1,1],[1,-1]])
 
 
-    def get_source_matrix(self, alpha, gamma, shape=None):
+    def get_source_matrix(self, alpha, gamma,
+            fac=1., shape=None):
         """
         Construct elements of the source matrix
 
@@ -47,6 +48,9 @@ class EnergyTransfer2Dirns(Advect1D):
             scattering strength
         gamma : float or numpy.ndarray
             dissipative attenuation coefficient
+        fac : float
+            convenience factor (eg self.dt) to multiply
+            source matrix by
         shape : tuple
             shape of outputs
 
@@ -68,10 +72,10 @@ class EnergyTransfer2Dirns(Advect1D):
                 else np.full(shape, gamma))
 
         # set the source matrix [[a,b],[c,d]]
-        a = alp*self.unit_scat_source[0,0] - gam
-        b = alp*self.unit_scat_source[0,1]
-        c = alp*self.unit_scat_source[1,0]
-        d = alp*self.unit_scat_source[1,1] - gam
+        a = fac*(alp*self.unit_scat_source[0,0] - gam)
+        b = fac*(alp*self.unit_scat_source[0,1])
+        c = fac*(alp*self.unit_scat_source[1,0])
+        d = fac*(alp*self.unit_scat_source[1,1] - gam)
         return a, b, c, d
 
 
@@ -103,7 +107,9 @@ class EnergyTransfer2Dirns(Advect1D):
         u_ = self.advect(u, c)
         v_ = self.advect(v, -c)
         # set the source matrix [[a,b],[c,d]]
-        a, b, c, d = self.get_source_matrix(alpha, gamma, u.shape)
+        # NB multiply by self.dt
+        a, b, c, d = self.get_source_matrix(
+                alpha, gamma, fac=self.dt, shape=u.shape)
         """
         system to solve:
         u^{n+1}, v^{n+1} = ...
@@ -139,7 +145,9 @@ class EnergyTransfer2Dirns(Advect1D):
             updated quantity
         """
         # set the source matrix [[a,b],[c,d]]
-        a, b, c, d = self.get_source_matrix(alpha, gamma, u.shape)
+        # NB multiply by self.dt
+        a, b, c, d = self.get_source_matrix(
+                alpha, gamma, fac=self.dt, shape=u.shape)
         return (
                 self.advect(u,  c) + a*u + b*v,
                 self.advect(v, -c) + c*u + d*v,
