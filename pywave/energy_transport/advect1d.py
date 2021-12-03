@@ -97,8 +97,8 @@ class Advect1D:
         --------
         flux : numpy.ndarray
         """
-        theta = diffl(u)/(diffr(u)+3.e-14)
-        phi = self.limiter(theta)
+        r = diffl(u)/(diffr(u)+3.e-14) #ratio of rhs to lhs gradient
+        phi = self.limiter(r)
         return c*u + phi*(self.flux(u, c, *args) - c*u)
 
 

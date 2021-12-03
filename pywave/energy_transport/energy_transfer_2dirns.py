@@ -11,7 +11,6 @@ class EnergyTransfer2Dirns(Advect1D):
     def __init__(self, dx, dt,
             unit_scat_source=None, aniso=True,
             scheme='lax_wendroff', limiter=None,
-            flux_correction_scheme=None,
             u_correction_scheme="split_step"):
         """
         Parameters:
@@ -20,17 +19,10 @@ class EnergyTransfer2Dirns(Advect1D):
         aniso : bool
         scheme : str
         limiter : str
-        flux_correction_scheme : str
         u_correction_scheme : str
         """
 
         super().__init__(dx, dt, scheme=scheme, limiter=limiter)
-        if scheme == "lax_wendroff":
-            self.flux = {
-                    "explicit" : self.flux_lax_wendroff_explicit,
-                    "implicit" : self.flux_lax_wendroff_implicit,
-                    None : self.flux_lax_wendroff,
-                    }[flux_correction_scheme]
         if u_correction_scheme == "split_step":
             # don't correct flux with alpha if using split step
             assert(flux_correction_scheme is None)
