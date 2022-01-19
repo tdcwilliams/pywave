@@ -17,7 +17,6 @@ class Advect1D:
         }[scheme]
         self.limiter = LIMITERS[limiter]
 
-
     def flux_fou(self, u, c, *args):
         """
         flux for first order upwind
@@ -35,7 +34,6 @@ class Advect1D:
         flux : numpy.ndarray
         """
         return c*u
-
 
     def flux_lax_friedrichs(self, u, c, *args):
         """
@@ -57,7 +55,6 @@ class Advect1D:
         f = c*u
         return .5*(sumr(f)-r*diffr(f))
 
-
     def flux_lax_wendroff(self, u, c, *args):
         """
         flux for Lax-Wendroff - direct space-time, 2nd order
@@ -77,7 +74,6 @@ class Advect1D:
         r = self.dt/self.dx
         f = c*u
         return .5*( sumr(f) - c*r*diffr(f) )
-
 
     def limited_flux(self, u, c, *args):
         """
@@ -100,7 +96,6 @@ class Advect1D:
         r = diffl(u)/(diffr(u)+3.e-14) #ratio of rhs to lhs gradient
         phi = self.limiter(r)
         return c*u + phi*(self.flux(u, c, *args) - c*u)
-
 
     def check_u_c(self, u, c):
         """
@@ -135,7 +130,6 @@ class Advect1D:
             return u, c, same_dirn
         return u[::-1], c_, same_dirn
  
-
     def advect(self, u, c, *args):
         """
         Advect u for one time step.
