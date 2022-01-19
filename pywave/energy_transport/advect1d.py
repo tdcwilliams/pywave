@@ -115,21 +115,18 @@ class Advect1D:
         -----------
         u_tmp : numpy.ndarray
             quantity to be advected
-        c_tmp : float or numpy.ndarray
+        c_tmp : numpy.ndarray
             velocity
-        same_dirn : bool
+        waves_to_right : bool
             True if advecting to right
         """
         if isinstance(c, np.ndarray):
-            same_dirn = np.all(c>0)
-            if not same_dirn: c_ = -c[::-1]
-        else:
-            same_dirn = (c>0)
-            if not same_dirn: c_ = -c
-
-        if same_dirn:
-            return u, c, same_dirn
-        return u[::-1], c_, same_dirn
+            if np.all(c>0):
+                return u, c, True
+            return u[::-1], -c[::-1], False
+        if c>0:
+            return u, np.full_like(u, c), True
+        return u[::-1], np.full_like(u, -c), False
 
     def apply_boundary_conditions(self, u, c, neumann=True, u_in=0):
         """
@@ -165,7 +162,7 @@ class Advect1D:
         c_[:self.nghost] = c[0]
         return u_, c_
 
-    def advect(self, u, c, *args):
+    def advect(self, u, c, *args, **kwargs):
         """
         Advect u for one time step.
         
@@ -183,11 +180,15 @@ class Advect1D:
         u_new : numpy.ndarray
             updated quantity
         """
-        # do we need to allow for negative velocity?
-        u_, c_, same_dirn = self.check_u_c(u, c)
-        u_, c_ = self.apply_boundary_conditions(u, c, **kwargs)
+        # code works for advection to right
+        u_, c_, waves_to_right = self.check_u_c(u, c)
+        # pad ghost cells to apply boundary conditions
+        u_, c_ = self.apply_boundary_conditions(u_, c_, **kwargs)
+        # advect
         f  = self.limited_flux(u_, c_, *args)
         u_ = u_ - self.dt*diffl(f)/self.dx
+        # rm ghost cells
         u_ = u_[self.nghost:]
-        if same_dirn: return u_
+        if waves_to_right: return u_
+        # flip if advecting to left
         return u_[::-1]
