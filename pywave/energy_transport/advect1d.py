@@ -7,9 +7,10 @@ from pywave.energy_transport.flux_limiters import LIMITERS
 
 class Advect1D:
     
-    def __init__(self, dx, dt, scheme='lax_wendroff', limiter=None):
+    def __init__(self, dx, dt, nghost=3, scheme='lax_wendroff', limiter=None):
         self.dx = dx
         self.dt = dt
+        self.nghost = nghost
         self.flux = {
             'first_order_upwind' : self.flux_fou,
             'lax_friedrichs' : self.flux_lax_friedrichs,
@@ -129,7 +130,41 @@ class Advect1D:
         if same_dirn:
             return u, c, same_dirn
         return u[::-1], c_, same_dirn
- 
+
+    def apply_boundary_conditions(self, u, c, neumann=True, u_in=0):
+        """
+        Apply boundary conditions
+
+        Parameters:
+        -----------
+        u : numpy.ndarray
+            quantity to be advected
+        c : float or numpy.ndarray
+            velocity
+        neumann : bool
+            True : set u on the ghost cells to u[0]
+                to give u_x=0 (Neumann) boundary conditions
+            False : set u on the ghost cells to u_in
+        u_in : float
+            value of u coming from the left boundary
+
+        Returns:
+        -----------
+        u_tmp : numpy.ndarray
+            quantity to be advected
+        c_tmp : float or numpy.ndarray
+            velocity
+        """
+        shp = (len(u)+self.nghost,)
+        u_ = np.zeros(shp)
+        c_ = np.zeros(shp)
+        u_[self.nghost:] = u
+        c_[self.nghost:] = c
+        # fill ghost cells
+        u_[:self.nghost] = u[0] if neumann else u_in
+        c_[:self.nghost] = c[0]
+        return u_, c_
+
     def advect(self, u, c, *args):
         """
         Advect u for one time step.
@@ -140,6 +175,8 @@ class Advect1D:
             quantity to be advected
         c : float or numpy.ndarray
             velocity
+        args for self.check_u_c
+        kwargs for self.apply_boundary_conditions
         
         Returns:
         --------
@@ -148,7 +185,9 @@ class Advect1D:
         """
         # do we need to allow for negative velocity?
         u_, c_, same_dirn = self.check_u_c(u, c)
+        u_, c_ = self.apply_boundary_conditions(u, c, **kwargs)
         f  = self.limited_flux(u_, c_, *args)
         u_ = u_ - self.dt*diffl(f)/self.dx
+        u_ = u_[self.nghost:]
         if same_dirn: return u_
         return u_[::-1]
