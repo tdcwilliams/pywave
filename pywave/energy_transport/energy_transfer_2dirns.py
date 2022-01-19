@@ -7,35 +7,31 @@ from pywave.energy_transport.advect1d import Advect1D
 class EnergyTransfer2Dirns(Advect1D):
     """ Class to manage energy transfer between 2 directions """
 
-
     def __init__(self, dx, dt,
             unit_scat_source=None, aniso=True,
-            scheme='lax_wendroff', limiter=None,
-            u_correction_scheme="split_step"):
+            u_correction_scheme="split_step", **kwargs):
         """
         Parameters:
         -----------
+        dx : float
+        dt : float
         unit_scat_source : numpy.ndarray
         aniso : bool
-        scheme : str
-        limiter : str
         u_correction_scheme : str
+        kwargs for Advect1D
         """
-
-        super().__init__(dx, dt, scheme=scheme, limiter=limiter)
+        super().__init__(dx, dt, **kwargs)
         self.step = {
                     "explicit" : self.step_explicit,
                     "implicit" : self.step_implicit,
                     "split_step" : self.step_split,
                     }[u_correction_scheme]
-
         if unit_scat_source is not None:
             self.unit_scat_source = unit_scat_source
         elif aniso:
             self.unit_scat_source = np.array([[-1,-1],[1,1]])
         else:
             self.unit_scat_source = np.array([[-1,1],[1,-1]])
-
 
     def get_source_matrix(self, alpha, gamma,
             fac=1., shape=None):
@@ -78,8 +74,7 @@ class EnergyTransfer2Dirns(Advect1D):
         d = fac*(alp*self.unit_scat_source[1,1] - gam)
         return a, b, c, d
 
-
-    def step_implicit(self, u, v, c, alpha, gamma):
+    def step_implicit(self, u, v, ct, alpha, gamma, neumann=True, u_in=0):
         """
         Advect and attenuate u for one time step.
         Do attenuation explicitly.
@@ -90,12 +85,18 @@ class EnergyTransfer2Dirns(Advect1D):
             quantity to be advected to right
         v : numpy.ndarray
             quantity to be advected to left
-        c : float or numpy.ndarray
+        ct : float or numpy.ndarray
             velocity
         alpha : float or numpy.ndarray
             scattering strength
         gamma : float or numpy.ndarray
             dissipative attenuation coefficient
+        neumann : bool
+            True : set u on the ghost cells to u[0]
+                to give u_x=0 (Neumann) boundary conditions
+            False : set u on the ghost cells to u_in
+        u_in : float
+            value of u coming from the left boundary
         
         Returns:
         --------
@@ -104,8 +105,8 @@ class EnergyTransfer2Dirns(Advect1D):
         v_new : numpy.ndarray
             updated quantity advected to left
         """
-        u_ = self.advect(u, c)
-        v_ = self.advect(v, -c)
+        u_ = self.advect(u,  ct, neumann=neumann, u_in=u_in)
+        v_ = self.advect(v, -ct, neumann=neumann, u_in=0)
         # set the source matrix [[a,b],[c,d]]
         # NB multiply by self.dt
         a, b, c, d = self.get_source_matrix(
@@ -124,8 +125,7 @@ class EnergyTransfer2Dirns(Advect1D):
         det = (1-a)*(1-d) - b*c
         return ((1-d)*u_ + b*v_)/det, (c*u_ + (1-a)*v_)/det
 
-
-    def step_explicit(self, u, v, c, alpha, gamma):
+    def step_explicit(self, u, v, c, alpha, gamma, neumann=True, u_in=0):
         """
         Advect and attenuate u for one time step.
         Do attenuation explicitly.
@@ -137,7 +137,15 @@ class EnergyTransfer2Dirns(Advect1D):
         c : float or numpy.ndarray
             velocity
         alpha : float or numpy.ndarray
-            attenuation coefficient
+            scattering attenuation coefficient
+        gamma : float or numpy.ndarray
+            dissipative attenuation coefficient
+        neumann : bool
+            True : set u on the ghost cells to u[0]
+                to give u_x=0 (Neumann) boundary conditions
+            False : set u on the ghost cells to u_in
+        u_in : float
+            value of u coming from the left boundary
         
         Returns:same_dirn
         --------
@@ -149,12 +157,11 @@ class EnergyTransfer2Dirns(Advect1D):
         a, b, c, d = self.get_source_matrix(
                 alpha, gamma, fac=self.dt, shape=u.shape)
         return (
-                self.advect(u,  c) + a*u + b*v,
-                self.advect(v, -c) + c*u + d*v,
+                self.advect(u,  c, neumann=neumann, u_in=u_in) + a*u + b*v,
+                self.advect(v, -c, neumann=neumann, u_in=0) + c*u + d*v,
                 )
 
-
-    def step_split(self, u, v, ct, alpha, gamma):
+    def step_split(self, u, v, ct, alpha, gamma, neumann=True, u_in=0):
         """
         Advect and attenuate u for one time step.
         Do attenuation explicitly.
@@ -171,6 +178,12 @@ class EnergyTransfer2Dirns(Advect1D):
             scattering strength
         gamma : float or numpy.ndarray
             dissipative attenuation coefficient
+        neumann : bool
+            True : set u on the ghost cells to u[0]
+                to give u_x=0 (Neumann) boundary conditions
+            False : set u on the ghost cells to u_in
+        u_in : float
+            value of u coming from the left boundary
 
         Returns:
         --------
@@ -179,8 +192,8 @@ class EnergyTransfer2Dirns(Advect1D):
         v_new : numpy.ndarray
             updated quantity to be advected to left
         """
-        u_ = self.advect(u, ct)
-        v_ = self.advect(v, -ct)
+        u_ = self.advect(u,  ct, neumann=neumann, u_in=u_in)
+        v_ = self.advect(v, -ct, neumann=neumann, u_in=0)
 
         # set the source matrix [[a,b],[c,d]]
         a, b, c, d = self.get_source_matrix(alpha, gamma, u.shape)
