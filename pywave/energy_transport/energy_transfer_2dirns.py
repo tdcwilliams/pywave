@@ -196,7 +196,8 @@ class EnergyTransfer2Dirns(Advect1D):
         v_ = self.advect(v, -ct, neumann=neumann, u_in=0)
 
         # set the source matrix [[a,b],[c,d]]
-        a, b, c, d = self.get_source_matrix(alpha, gamma, u.shape)
+        a, b, c, d = self.get_source_matrix(
+                alpha, gamma, fac=self.dt, shape=u.shape)
         u_new, v_new = solve_2d_ode_spectral(
                 u_, v_, np.array([self.dt]), a, b, c, d)
         return u_new[0], v_new[0]
