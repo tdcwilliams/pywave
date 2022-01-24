@@ -315,7 +315,8 @@ def solve_2d_ode_spectral(u0, v0, t, a, b, c, d):
     u_all = np.zeros(shp)
     v_all = np.zeros(shp)
     discr = (a+d)**2 - 4*(a*d-b*c)
-    assert(np.all(discr >= 0))
+    assert(np.all(discr >= -1e-8))
+    discr[discr<0] = 0.
     lam_av = (a+d)/2 # average of the 2 eigenvalues
 
     # 1st do bits where matrix is diagonal
