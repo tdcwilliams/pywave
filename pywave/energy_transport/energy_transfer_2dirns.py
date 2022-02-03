@@ -33,8 +33,7 @@ class EnergyTransfer2Dirns(Advect1D):
         else:
             self.unit_scat_source = np.array([[-1,1],[1,-1]])
 
-    def get_source_matrix(self, alpha, gamma,
-            fac=1., shape=None):
+    def get_source_matrix(self, alpha, gamma, shape=None):
         """
         Construct elements of the source matrix
 
@@ -44,9 +43,6 @@ class EnergyTransfer2Dirns(Advect1D):
             scattering strength
         gamma : float or numpy.ndarray
             dissipative attenuation coefficient
-        fac : float
-            convenience factor (eg self.dt) to multiply
-            source matrix by
         shape : tuple
             shape of outputs
 
@@ -68,10 +64,10 @@ class EnergyTransfer2Dirns(Advect1D):
                 else np.full(shape, gamma))
 
         # set the source matrix [[a,b],[c,d]]
-        a = fac*(alp*self.unit_scat_source[0,0] - gam)
-        b = fac*(alp*self.unit_scat_source[0,1])
-        c = fac*(alp*self.unit_scat_source[1,0])
-        d = fac*(alp*self.unit_scat_source[1,1] - gam)
+        a = alp*self.unit_scat_source[0,0] - gam
+        b = alp*self.unit_scat_source[0,1]
+        c = alp*self.unit_scat_source[1,0]
+        d = alp*self.unit_scat_source[1,1] - gam
         return a, b, c, d
 
     def step_implicit(self, u, v, ct, alpha, gamma, neumann=True, u_in=0):
@@ -107,23 +103,24 @@ class EnergyTransfer2Dirns(Advect1D):
         """
         u_ = self.advect(u,  ct, neumann=neumann, u_in=u_in)
         v_ = self.advect(v, -ct, neumann=neumann, u_in=0)
-        # set the source matrix [[a,b],[c,d]]
-        # NB multiply by self.dt
-        a, b, c, d = self.get_source_matrix(
-                alpha, gamma, fac=self.dt, shape=u.shape)
+        # get the source matrix [[a,b],[c,d]] * dt
+        a_, b_, c_, d_ = [self.dt * arr
+                for arr in self.get_source_matrix(alpha, gamma, shape=u.shape)]
         """
         system to solve:
         u^{n+1}, v^{n+1} = ...
-            + (a*u^{n+1} + b*v^{n+1}, c*u^{n+1} + d*v^{n+1})
+            + (a*u^{n+1} + b*v^{n+1}, c*u^{n+1} + d*v^{n+1})*dt
         ie need to invert
-            A = [[1-a,-b],[-c,1-d]]
+            A = [[1-a_,-b_],[-c_,1-d_]]
+            with
+            [a_, b_, c_, d_] = [a, b, c, d]*dt
         This has inverse
-            Ainv = [[1-d,b],[c,1-a]]/det
+            Ainv = [[1-d_,b_],[c_,1-a_]]/det
         where
-            det = (1-d)*(1-a) - b*c
+            det = (1-d_)*(1-a_) - b_*c_
         """
-        det = (1-a)*(1-d) - b*c
-        return ((1-d)*u_ + b*v_)/det, (c*u_ + (1-a)*v_)/det
+        det = (1-a_)*(1-d_) - b_*c_
+        return ((1-d_)*u_ + b_*v_)/det, (c_*u_ + (1-a_)*v_)/det
 
     def step_explicit(self, u, v, c, alpha, gamma, neumann=True, u_in=0):
         """
@@ -152,13 +149,11 @@ class EnergyTransfer2Dirns(Advect1D):
         u_new : numpy.ndarray
             updated quantity
         """
-        # set the source matrix [[a,b],[c,d]]
-        # NB multiply by self.dt
-        a, b, c, d = self.get_source_matrix(
-                alpha, gamma, fac=self.dt, shape=u.shape)
+        # get the source matrix [[a,b],[c,d]]
+        a, b, c, d = self.get_source_matrix(alpha, gamma, shape=u.shape)
         return (
-                self.advect(u,  c, neumann=neumann, u_in=u_in) + a*u + b*v,
-                self.advect(v, -c, neumann=neumann, u_in=0) + c*u + d*v,
+                self.advect(u,  c, neumann=neumann, u_in=u_in) + self.dt*(a*u + b*v),
+                self.advect(v, -c, neumann=neumann, u_in=0) + self.dt*(c*u + d*v),
                 )
 
     def step_split(self, u, v, ct, alpha, gamma, neumann=True, u_in=0):
@@ -196,8 +191,7 @@ class EnergyTransfer2Dirns(Advect1D):
         v_ = self.advect(v, -ct, neumann=neumann, u_in=0)
 
         # set the source matrix [[a,b],[c,d]]
-        a, b, c, d = self.get_source_matrix(
-                alpha, gamma, fac=self.dt, shape=u.shape)
+        a, b, c, d = self.get_source_matrix(alpha, gamma, shape=u.shape)
         u_new, v_new = solve_2d_ode_spectral(
                 u_, v_, np.array([self.dt]), a, b, c, d)
         return u_new[0], v_new[0]
