@@ -57,12 +57,12 @@ def conservative_remapping_weights(x_src, x_dst):
     """
     m = len(x_src) - 1
     n = len(x_dst) - 1
-    w = np.zeros((m,n))
+    w = np.zeros((n,m))
     xl = x_dst[:-1]
     xr = x_dst[1:]
     for i in range(m):
         x0, x1 = x_src[i:i+2]
         overlap = (xr > x0) * (xl < x1)
-        w[i,overlap] = (vector_min(xr[overlap], x1)
-                - vector_max(xl[overlap], x0))
+        w[overlap,i] = (vector_min(xr[overlap], x1)
+                - vector_max(xl[overlap], x0)) / (x1 - x0)
     return w
