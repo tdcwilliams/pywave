@@ -43,6 +43,7 @@ class TestLib(unittest.TestCase):
         self.assertTrue(np.allclose(
             w.sum(axis=0), np.ones((10))
             ))
+
         w2 = np.zeros((40,10))
         for i in range(10):
             w2[4*i:4*(i+1), i] = .25
