@@ -1,5 +1,6 @@
 import numpy as np
 from pywave.scattering.helmholtz_1d import Helmholtz1D
+from pywave.scattering.open_water_base import OpenWaterBase
 
 
 class ExtendedShallowWater(Helmholtz1D, OpenWaterBase):
@@ -8,7 +9,7 @@ class ExtendedShallowWater(Helmholtz1D, OpenWaterBase):
     Extended shallow water of Porter (2019)
     """
 
-    def __init__(self, xlim=None, **kwargs)
+    def __init__(self, xlim=None, **kwargs):
         """
         Solves Helmholtz equation
         0 = beta*q_xx + (alpha/h)*q
