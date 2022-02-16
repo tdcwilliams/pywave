@@ -25,7 +25,6 @@ class ScattererBase:
         om = [med.omega for med in self.media]
         assert(len(set(om)) == 1)
 
-        
     @property
     def params(self):
         """
@@ -43,7 +42,6 @@ class ScattererBase:
             params[k] = [med.params[k] for med in self.media]
         return params
     
-
     @property
     def period(self):
         """
@@ -54,7 +52,6 @@ class ScattererBase:
         """
         return self.media[0].period
     
-
     @property
     def omega(self):
         """
@@ -65,7 +62,6 @@ class ScattererBase:
             = 2\pi/period
         """
         return self.media[0].omega
-
 
     @property
     def intrinsic_admittance(self):
@@ -78,7 +74,6 @@ class ScattererBase:
         cc = [self.media[i].k[0]*self.media[i].kappa for i in [0,-1]]
         return cc[-1]/cc[0]
 
-
     @property
     def xlim(self):
         """
@@ -89,7 +84,6 @@ class ScattererBase:
             (both are self.position for a sharp change in properties)
         """
         return self.media[0].xlim[1], self.media[-1].xlim[0]
-
 
     def get_solution_params(self, index, ip, im):
         """
@@ -126,7 +120,6 @@ class ScattererBase:
                + self.bm[self.slices[i-1],:].dot(im),
             )
 
-
     def test_power_input(self):
         """
         Test the net power input is zero. Checks both
@@ -142,7 +135,6 @@ class ScattererBase:
                 im[0] = 1
             return ip, im
 
-
         def run_power_test(from_left):
             # test power input to left and right hand strings is the same
             ip, im = simple_inputs(from_left)
@@ -157,7 +149,6 @@ class ScattererBase:
         for from_left in [True, False]:
             run_power_test(from_left)
 
-
     def test_energy(self):
         """
         Test energy is conserved
@@ -168,7 +159,6 @@ class ScattererBase:
         e = np.abs(self.Rm[0,0])**2 + np.abs(self.Tm[0,0])**2/alp
         assert(np.abs(e-1) < 1e-8)
         print('Energy is OK')    
-
 
     def test_boundary_conditions(self, inc_amps=None):
         """
@@ -188,7 +178,6 @@ class ScattererBase:
         assert(np.abs(u_m - u_p) < 1e-8)
         assert(np.abs(sig_m - sig_p) < 1e-8)
         print("Boundary conditions are OK")
-
 
     def get_expansion(self, x, inc_amps=None, get_disp=True):
         """
@@ -227,7 +216,6 @@ class ScattererBase:
             u[b] = med.get_expansion(x[b], **kw, get_disp=True)
         return u, lbl
        
-
     @property
     def default_plot_range(self):
         fac = 2.5
@@ -243,7 +231,6 @@ class ScattererBase:
         if self.media[-1].semi_infinite:
             x1 = xlim[0] + fac*lam
         return x0, x1, lam
-
 
     def plot_expansion(self, ax=None, t=0, x=None, inc_amps=None,
                       get_disp=True, no_title=False, **kwargs):
@@ -302,7 +289,6 @@ class ScattererBase:
         ax.set_ylim([-umax, umax])
         return ax
     
-
     def animate_displacement(self, figname='animation.gif', **kwargs):
         """
         make an animation of the displacement (saved to file)

@@ -29,7 +29,6 @@ class MultipleScatterer(ScattererBase):
             n_unk = self.num_unknowns
             self.num_unknowns += med.num_modes
             self.slices += [slice(n_unk, self.num_unknowns)]
-        
 
     def _assemble_matrices(self):
         z = lambda : np.zeros((self.num_unknowns, self.num_unknowns), dtype=np.complex)
@@ -48,7 +47,6 @@ class MultipleScatterer(ScattererBase):
                     self.scatterers[i].Tm.dot(m_diag))
         return a00, a01, a10, a11
 
-        
     def _assemble_vectors(self):
         bp = np.zeros((self.num_unknowns, self.media[0].num_modes), dtype=np.complex)
         bp[self.slices[0],:] = self.scatterers[0].Tp
@@ -56,14 +54,12 @@ class MultipleScatterer(ScattererBase):
         bm[self.slices[-1],:] = self.scatterers[-1].Tm
         return bp, bm
 
-    
     def _eliminate(self, a10, a11, bm):
         _, nm = bm.shape
         c = np.linalg.solve(np.eye(self.num_unknowns) - a11,
                             np.hstack([bm, a10]))
         return c[:,nm:], c[:,:nm]
 
-        
     def _set_scattering_matrices(self):
         mat = self.scatterers[0].Tm.dot(self.media[1].phase_matrix)
         self.Rp = self.scatterers[0].Rp + mat.dot(self.bp[self.slices[0],:])
@@ -71,7 +67,6 @@ class MultipleScatterer(ScattererBase):
         mat = self.scatterers[-1].Tp.dot(self.media[-2].phase_matrix)
         self.Rm = self.scatterers[-1].Rm + mat.dot(self.am[self.slices[-1],:])
         self.Tp = mat.dot(self.ap[self.slices[-1],:])
-
 
     def solve(self):
         """ Solve the multiple scattering problem TODO implement! """
@@ -87,7 +82,6 @@ class MultipleScatterer(ScattererBase):
         self.bp, self.bm = b[:,:npos], b[:,npos:]
         self._set_scattering_matrices()
 
-        
     def test_boundary_conditions(self, inc_amps=None):
         if inc_amps is None:
             inc_amps = np.array([[1]]), np.array([[.5]])

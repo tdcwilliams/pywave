@@ -28,7 +28,6 @@ class MediumBoundary(ScattererBase):
             ])
         self.set_condition_types(condition_types=condition_types)
 
-
     def sort_edge_operators(self):
         """
         Returns:
@@ -46,7 +45,6 @@ class MediumBoundary(ScattererBase):
         names0 = names0.difference(names_common)
         names1 = names1.difference(names_common)
         return names_common, (names0, names1)
-
 
     def set_condition_types(self, condition_types=None):
         """
@@ -77,7 +75,6 @@ class MediumBoundary(ScattererBase):
         for med in self.media:
             self.condition_types += [{name : True
                 for name in med.edge_operators}]
-
 
     def assemble(self):
         """
@@ -134,7 +131,6 @@ class MediumBoundary(ScattererBase):
         assert(n_eqns==nrows)
         return matrix, forcing
 
-
     def solve(self):
         """
         Solve the boundary conditions to set the scattering matrices
@@ -161,7 +157,6 @@ class MediumBoundary(ScattererBase):
         self.Tm = unknowns[:nk0, nk0:] #transmitted from right
         self.Tp = unknowns[nk0:, :nk0] #transmitted from left
         self.Rm = unknowns[nk0:, nk0:] #reflected from right
-
 
     def test_boundary_conditions(self, inc_amps=None):
         """

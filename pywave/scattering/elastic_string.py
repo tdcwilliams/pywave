@@ -34,7 +34,6 @@ class ElasticString(Helmholtz1D):
         super().__init__(helmholtz_coef=kappa,
                 k=np.sqrt(m/kappa)*self.omega, xlim=xlim)
 
-
     def set_operators(self):
         """
         Set some operators for convenience

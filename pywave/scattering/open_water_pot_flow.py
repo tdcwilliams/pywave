@@ -10,7 +10,6 @@ class OpenWaterPotentialFlow(OpenWaterBase):
         super().__init__(**kwargs)
         self.num_roots = num_roots
 
-
     @staticmethod
     def increment_nr_small(w, alp):
         c = np.cosh(w)
@@ -19,14 +18,12 @@ class OpenWaterPotentialFlow(OpenWaterBase):
         df = (1-alp)*s + w*c
         return -f/df
 
-
     @staticmethod
     def increment_nr_large(w, alp):
         t = np.tanh(w)
         f = w*t - alp
         df = (1-alp)*t + w
         return -f/df
-
 
     @staticmethod
     def increment_nr(w, alp):
@@ -43,7 +40,6 @@ class OpenWaterPotentialFlow(OpenWaterBase):
             dw[use] = self.increment_nr_large(w[use], alp)
         return dw
 
-
     @staticmethod
     def increment_nr_imag(w, alp):
         c = np.cos(w)
@@ -51,7 +47,6 @@ class OpenWaterPotentialFlow(OpenWaterBase):
         f  = w*s+alp*c
         df = (1-alp)*s + w*c
         return -f/df
-
 
     @staticmethod
     def find_root_nr(inc_nr_fun, guess, params=None, tol=1e-9, maxits=20):
@@ -65,7 +60,6 @@ class OpenWaterPotentialFlow(OpenWaterBase):
                 break
         w[~converged] = np.nan
         return w
-
 
     def find_real_root(self, guess=None, **kwargs):
         """
@@ -85,7 +79,6 @@ class OpenWaterPotentialFlow(OpenWaterBase):
         assert(np.isfinite(w)) #TODO implement catch here
         return np.abs(w)/self.depth
 
-
     @staticmethod
     def check_imag_roots(w):
         rh = np.array(
@@ -94,7 +87,6 @@ class OpenWaterPotentialFlow(OpenWaterBase):
         w[w > rh] = np.nan
         w[w < lh] = np.nan
         return w
-
 
     def find_imag_roots(self, guess=None, **kwargs):
         """
@@ -116,7 +108,6 @@ class OpenWaterPotentialFlow(OpenWaterBase):
         assert(np.all(np.isfinite(w))) #TODO implement catch here
         return _ZI*w/self.depth
 
-
     def solve_disprel(self, guess=None):
 
         gr, gi = None, None
@@ -127,7 +118,6 @@ class OpenWaterPotentialFlow(OpenWaterBase):
         self.k = np.zeros((self.num_roots+1,), dtype=np.complex)
         self.k[0] = self.find_real_root(guess=gr)
         self.k[1:] = self.find_imag_roots(guess=gi)
-
 
     def get_norms(self):
         """
