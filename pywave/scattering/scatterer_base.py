@@ -85,6 +85,25 @@ class ScattererBase:
         """
         return self.media[0].xlim[1], self.media[-1].xlim[0]
 
+    def get_simple_inputs(self, from_left=True):
+        """
+        Get simple inputs
+        ie single wave from left or right
+
+        Parameters:
+        -----------
+        from_left : bool
+            if True, inputs correspond to a single wave from left
+            if False, inputs correspond to a single wave from right
+        """
+        ip = np.zeros_like(self.media[0].k)
+        im = np.zeros_like(self.media[1].k)
+        if from_left:
+            ip[0] = 1
+        else:
+            im[0] = 1
+        return ip, im
+
     def get_solution_params(self, index, ip, im):
         """
         Get amplitudes of scattered waves
@@ -125,19 +144,10 @@ class ScattererBase:
         Test the net energy flux is zero. Checks both
         when the wave is from the right or the left.
         """
-        def simple_inputs(from_left):
-            nmed = len(self.media)
-            ip = np.zeros_like(self.media[0].k)
-            im = np.zeros_like(self.media[1].k)
-            if from_left:
-                ip[0] = 1
-            else:
-                im[0] = 1
-            return ip, im
 
         def run_flux_test(from_left):
             # test energy flux to left and right hand scatterers is the same
-            ip, im = simple_inputs(from_left)
+            ip, im = self.get_simple_inputs(from_left)
             pl, pr = [self.media[i].get_energy_flux(
                     **self.get_solution_params(i, ip, im))
                     for i in range(2)]

@@ -208,3 +208,34 @@ class MultipleScatterer(ScattererBase):
                 print(f'{name} = {val[-1]} = {bv_r[name][0]}?')
                 assert(np.allclose(val[-1:], bv_r[name][:1]))
         print("Boundary conditions are OK")
+
+    def get_energy_info(self, inc_amps=None):
+        """
+        Returns:
+        --------
+        energy_info : dict(numpy.ndarray)
+            items:
+                x : positions of the edges of the interior media
+                    (len=num_interior_media+1)
+                cg : group velocity in all the interior media
+                    (len=num_interior_media)
+                ep : energy travelling to the right in all the interior media
+                    (len=num_interior_media)
+                em : energy travelling to the left in all the interior media
+                    (len=num_interior_media)
+        """
+        if inc_amps is None:
+            inc_amps = self.get_simple_inputs()
+        ip, im = inc_amps
+        energy_info = defaultdict(list)
+        for i, med in enumerate(self.interior_media):
+            x0, x1 = med.xlim
+            if i == 0: energy_info["x"] += [x0]
+            energy_info["x"] += [x1]
+            energy_info["cg"] += [med.group_velocity]
+
+            a0, a1 = self.get_solution_params(i+1, ip, im)
+            ep, em = med.get_energies(a0, a1)
+            energy_info["ep"] += [ep]
+            energy_info["em"] += [em]
+        return {k : np.array(v) for k,v in energy_info.items()}
