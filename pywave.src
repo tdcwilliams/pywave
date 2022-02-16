@@ -1,0 +1,8 @@
+#! /bin/bash
+
+f=$(readlink -f ${BASH_SOURCE[0]})
+export PYWAVE_ROOT_DIR=$(dirname $f)
+export PYTHONPATH=$PYWAVE_ROOT_DIR:$PYTHONPATH
+
+conda activate pywave
+alias cdw="cd $PYWAVE_ROOT_DIR"
