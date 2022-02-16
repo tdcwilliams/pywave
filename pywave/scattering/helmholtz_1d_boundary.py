@@ -30,7 +30,6 @@ class Helmholtz1DBoundary(MediumBoundary):
         self.Tp = fac*np.array([[2*kk0]])
         self.Rm = fac*np.array([[kk1-kk0]])
 
-
     def test_boundary_conditions(self, inc_amps=None):
         """
         Test boundary conditions are satisfied

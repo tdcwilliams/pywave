@@ -100,7 +100,7 @@ class Helmholtz1D(Medium):
         u[b] += np.exp(_ZI*np.outer(x1 - xb, self.k)).dot(c1).flatten() # (nx,nk) x (nk,1) = (nx,1)
         return u
 
-    def get_power(self, a0, a1):
+    def get_energies(self, a0, a1):
         """
         Determine the power input to a segment of string
         Positive power input corresponds to energy travelling into
@@ -116,8 +116,10 @@ class Helmholtz1D(Medium):
 
         Returns:
         --------
-        power : float
-            power input from the right.
+        e0 : float
+            energy travelling to the right
+        e1 : float
+            energy travelling to the left
         """
-        fac = .5*self.omega*self.k[0]*self.helmholtz_coef
-        return fac*(np.abs(a1[0])**2 - np.abs(a0[0])**2)
+        fac = .5 * self.k[0]**2 *self.helmholtz_coef
+        return [fac*np.abs(a)**2 for a in (a0,a1)]

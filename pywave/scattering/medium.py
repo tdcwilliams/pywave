@@ -86,7 +86,7 @@ class Medium:
     @property
     def omega(self):
         """
-        Return omega (only works if self.period is defined)
+        Return omega
 
         Returns:
         --------
@@ -99,15 +99,28 @@ class Medium:
     @property
     def phase_velocity(self):
         """
-        Return omega (only works if self.period is defined)
+        Return phase velocity
 
         Returns:
         --------
-        omega : float
-            radial wave frequency (1/s)
-            = 2\pi/period
+        cp : float
+            phase velocity = omega/k
         """
         return self.omega / self.k[0]
+
+    @property
+    def group_velocity(self):
+        """
+        Return group velocity
+        - default is for a non-dispersive material
+          ie same as phase velocity
+
+        Returns:
+        --------
+        cg : float
+            group velocity = d\omega/dk
+        """
+        return self.phase_velocity
 
     @property
     def num_modes(self):
@@ -233,3 +246,25 @@ class Medium:
             matrices += [m]
             forcings += [f]
         return np.vstack(mats), np.vstack(forcings)
+
+    def get_energy_flux(self, a0, a1):
+        """
+        Determine the energy flux through a line in a wave medium.
+        Positive energy flux corresponds to energy travelling to the left.
+        Depends on the specific medium, which need get_energies method
+        and group_velocity property set
+
+        Parameters:
+        -----------
+        a0 : numpy.ndarray
+            coeffients of the waves travelling to the right
+        a1 : numpy.ndarray
+            coeffients of the waves travelling to the left
+
+        Returns:
+        --------
+        flux : float
+            net energy flux to the left
+        """
+        e0, e1 = self.get_energies(a0, a1)
+        return self.group_velocity * (e1 - e0)
