@@ -1,7 +1,7 @@
 #! /bin/bash
 
 f=$(readlink -f ${BASH_SOURCE[0]})
-export PYWAVE_ROOT_DIR=$(dirname $f)
+export PYWAVE_ROOT_DIR=$(dirname $(dirname $f))
 export PYTHONPATH=$PYWAVE_ROOT_DIR:$PYTHONPATH
 
 conda activate pywave
