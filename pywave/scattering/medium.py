@@ -96,6 +96,18 @@ class Medium:
         """
         return 2*np.pi/self.period # 1/s
 
+    @property
+    def phase_velocity(self):
+        """
+        Return omega (only works if self.period is defined)
+
+        Returns:
+        --------
+        omega : float
+            radial wave frequency (1/s)
+            = 2\pi/period
+        """
+        return self.omega / self.k[0]
 
     @property
     def num_modes(self):
