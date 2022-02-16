@@ -1,6 +1,6 @@
 import numpy as np
 
-from pywave.scatterer_base import ScattererBase
+from pywave.scattering.scatterer_base import ScattererBase
 
 
 class MultipleScatterer(ScattererBase):

@@ -1,5 +1,5 @@
 import numpy as np
-from pywave.open_water_base import OpenWaterBase
+from pywave.scattering.open_water_base import OpenWaterBase
 
 _ZI = np.complex(0,1)
 

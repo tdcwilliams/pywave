@@ -1,4 +1,4 @@
-from pywave.extended_shallow_water import ExtendedShallowWater
+from pywave.scattering.extended_shallow_water import ExtendedShallowWater
 
 
 class ShallowWater(ExtendedShallowWater):

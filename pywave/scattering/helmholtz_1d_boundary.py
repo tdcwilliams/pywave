@@ -1,6 +1,6 @@
 import numpy as np
 
-from pywave.medium_boundary import MediumBoundary
+from pywave.scattering.medium_boundary import MediumBoundary
 
 _ZI = np.complex(0, 1)
 

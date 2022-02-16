@@ -1,5 +1,5 @@
 import numpy as np
-from pywave.helmholtz_1d import Helmholtz1D
+from pywave.scattering.helmholtz_1d import Helmholtz1D
 
 _ZI = np.complex(0, 1)
 

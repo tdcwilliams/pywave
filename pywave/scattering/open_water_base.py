@@ -1,4 +1,4 @@
-from pywave.medium import Medium
+from pywave.scattering.medium import Medium
 
 
 class OpenWaterBase(Medium):

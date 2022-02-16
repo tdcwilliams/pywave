@@ -1,5 +1,5 @@
 import numpy as np
-from pywave.medium import Medium
+from pywave.scattering.medium import Medium
 
 _ZI = np.complex(0, 1)
 
