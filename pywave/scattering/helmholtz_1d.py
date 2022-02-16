@@ -102,10 +102,7 @@ class Helmholtz1D(Medium):
 
     def get_energies(self, a0, a1):
         """
-        Determine the power input to a segment of string
-        Positive power input corresponds to energy travelling into
-        the plane with normal vector being the positive x axis (i.e 
-        the energy is travelling in the direction of the negative x axis)
+        Determine the energies travelling in each direction
 
         Parameters:
         -----------
@@ -121,5 +118,5 @@ class Helmholtz1D(Medium):
         e1 : float
             energy travelling to the left
         """
-        fac = .5 * self.k[0]**2 *self.helmholtz_coef
+        fac = .5 *self.helmholtz_coef * self.k[0]**2
         return [fac*np.abs(a)**2 for a in (a0,a1)]

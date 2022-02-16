@@ -120,9 +120,9 @@ class ScattererBase:
                + self.bm[self.slices[i-1],:].dot(im),
             )
 
-    def test_power_input(self):
+    def test_energy_flux(self):
         """
-        Test the net power input is zero. Checks both
+        Test the net energy flux is zero. Checks both
         when the wave is from the right or the left.
         """
         def simple_inputs(from_left):
@@ -135,19 +135,19 @@ class ScattererBase:
                 im[0] = 1
             return ip, im
 
-        def run_power_test(from_left):
-            # test power input to left and right hand strings is the same
+        def run_flux_test(from_left):
+            # test energy flux to left and right hand scatterers is the same
             ip, im = simple_inputs(from_left)
-            pl, pr = [self.media[i].get_power(
+            pl, pr = [self.media[i].get_energy_flux(
                     **self.get_solution_params(i, ip, im))
                     for i in range(2)]
-            print(f'Test power input, from_left={from_left}:')
+            print(f'Test energy flux, from_left={from_left}:')
             print(f'\t{pl}, {pr}')
             assert(np.allclose([pl], [pr]))
             print('\tOK' )
 
         for from_left in [True, False]:
-            run_power_test(from_left)
+            run_flux_test(from_left)
 
     def test_energy(self):
         """
