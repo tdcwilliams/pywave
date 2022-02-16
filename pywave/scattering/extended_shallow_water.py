@@ -56,6 +56,15 @@ class ExtendedShallowWater(Helmholtz1D, OpenWaterBase):
         """
         return 1 - (self.wave_number_ow_id * self.depth)/3
 
+    @property
+    def group_velocity(self):
+        """
+        Returns:
+        --------
+        cg : float
+            group velocity
+        """
+        return self.beta * self.phase_velocity
 
     def set_operators(self):
         """
