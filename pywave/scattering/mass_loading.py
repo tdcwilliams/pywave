@@ -7,6 +7,15 @@ class MassLoadingBase(ExtendedShallowWater):
     """
 
     def __init__(self, rho_ice=922.5, thickness=1, **kwargs):
+        """
+        Parameters:
+        -----------
+        rho_ice : float
+            density of ice
+        thickness : float
+            thickness of ice
+        kwargs for ExtendedShallowWater
+        """
 
         self.rho_ice = rho_ice
         self.thickness = thickness
