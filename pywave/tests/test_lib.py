@@ -3,7 +3,7 @@ from mock import patch, call, MagicMock
 
 import numpy as np
 
-from pywave.scattering import lib
+from pywave.utils import lib
 
 
 class TestLib(unittest.TestCase):
