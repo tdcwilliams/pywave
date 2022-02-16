@@ -6,3 +6,4 @@ export PYTHONPATH=$PYWAVE_ROOT_DIR:$PYTHONPATH
 
 conda activate pywave
 alias cdw="cd $PYWAVE_ROOT_DIR"
+alias jw="cd $PYWAVE_ROOT_DIR/notebooks && jupyter-notebook &"

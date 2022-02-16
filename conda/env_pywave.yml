@@ -4,6 +4,7 @@ channels:
 dependencies:
  - ipdb
  - ipython
+ - jedi=0.17.2
  - jupyter
  - matplotlib
  - mock
@@ -14,8 +15,11 @@ dependencies:
  - numpy
  - pandas
  - pillow
- - python=3.6
+ - pip
+ - python=3.9
  - pyyaml
  - scikit-image
  - scikit-learn
  - scipy
+ - pip:
+   - celluloid
