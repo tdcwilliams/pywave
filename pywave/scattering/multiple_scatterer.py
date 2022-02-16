@@ -20,6 +20,17 @@ class MultipleScatterer(ScattererBase):
         self._set_media()
         self._set_sizes()
 
+    @property
+    def interior_media(self):
+        """
+        Returns:
+        --------
+        interior_media : list
+            list of media (inherit from Medium)
+            excluding the 1st and last
+        """
+        return self.media[1:-1]
+
     def _set_media(self):
         """
         Sets:
@@ -54,7 +65,7 @@ class MultipleScatterer(ScattererBase):
         """
         self.slices = []
         self.num_unknowns = 0
-        for med in self.media[1:-1]:
+        for med in self.interior_media:
             n_unk = self.num_unknowns
             self.num_unknowns += med.num_modes
             self.slices += [slice(n_unk, self.num_unknowns)]
@@ -72,7 +83,7 @@ class MultipleScatterer(ScattererBase):
         """
         z = lambda : np.zeros((self.num_unknowns, self.num_unknowns), dtype=np.complex)
         a00, a01, a10, a11 = [z(), z(), z(), z()]
-        for i, med in enumerate(self.media[1:-1]):
+        for i, med in enumerate(self.interior_media):
             m_diag = med.phase_matrix
             a01[self.slices[i], self.slices[i]] = (
                 self.scatterers[i].Rm.dot(m_diag))
@@ -95,11 +106,12 @@ class MultipleScatterer(ScattererBase):
         bp : numpy.ndarray
         bm : numpy.ndarray
         """
-        bp = np.zeros((self.num_unknowns, self.media[0].num_modes), dtype=np.complex)
-        bp[self.slices[0],:] = self.scatterers[0].Tp
-        bm = np.zeros((self.num_unknowns, self.media[-1].num_modes), dtype=np.complex)
-        bm[self.slices[-1],:] = self.scatterers[-1].Tm
-        return bp, bm
+        out = []
+        for i, att in [(0, "Tp"), (-1, "Tm")]:
+            b = np.zeros((self.num_unknowns, self.media[i].num_modes), dtype=np.complex)
+            b[self.slices[i],:] = getattr(self.scatterers[i], att)
+            out += [b]
+        return out
 
     def _eliminate(self, a10, a11, bm):
         """
