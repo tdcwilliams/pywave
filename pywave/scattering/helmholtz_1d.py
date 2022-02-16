@@ -6,7 +6,7 @@ _ZI = np.complex(0, 1)
 
 class Helmholtz1D(Medium):
     """
-    Class to manage properties of a meium that satisfies the Helmholtz equation in 1D.
+    Class to manage properties of a medium that satisfies the Helmholtz equation in 1D.
     """
 
     def __init__(self, k=1, helmholtz_coef=1, xlim=None):
@@ -29,13 +29,11 @@ class Helmholtz1D(Medium):
         self.k = np.array([k])
         super().__init__(xlim=xlim)
 
-
     def solve_disprel(self):
         """
         don't need to solve dispersion relation since we have k already
         """
         pass
-
 
     def set_operators(self):
         """
@@ -49,7 +47,6 @@ class Helmholtz1D(Medium):
                 helmholtz_u=lambda k : 1,
                 helmholtz_cux=lambda k : _ZI*self.helmholtz_coef*k,
                 )
-
 
     def set_edge_operators(self):
         """
@@ -69,7 +66,6 @@ class Helmholtz1D(Medium):
                     )
                 )
 
-    
     def get_expansion(self, x, a0, a1, get_disp=True):
         """
         Calculate a displacement profile
@@ -103,7 +99,6 @@ class Helmholtz1D(Medium):
         u[b] = np.exp(_ZI*np.outer(xb - x0, self.k)).dot(c0).flatten()  # (nx,nk) x (nk,1) = (nx,1)
         u[b] += np.exp(_ZI*np.outer(x1 - xb, self.k)).dot(c1).flatten() # (nx,nk) x (nk,1) = (nx,1)
         return u
-
 
     def get_power(self, a0, a1):
         """

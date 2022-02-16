@@ -35,7 +35,6 @@ class ExtendedShallowWater(Helmholtz1D, OpenWaterBase):
                 k = np.sqrt(self.wave_number_ow_id/(self.beta*self.depth)),
                 xlim=xlim)
 
-
     @property
     def wave_number_ow_id(self):
         """
@@ -45,7 +44,6 @@ class ExtendedShallowWater(Helmholtz1D, OpenWaterBase):
             infinite depth wave number for open water (omega^2/g)
         """
         return self.omega**2/self.gravity
-
 
     @property
     def beta(self):
@@ -71,4 +69,3 @@ class ExtendedShallowWater(Helmholtz1D, OpenWaterBase):
         self.operators['displacement'] = lambda k : -_ZI*k
         self.operators['horizontal_velocity'] = (
                 lambda k : (-_ZI*self.omega)/self.depth)
-

@@ -30,7 +30,6 @@ class OpenWaterBase(Medium):
         self.gravity = gravity
         super().__init__(xlim=xlim)
 
-
     @property
     def wave_number_ow_id(self):
         """

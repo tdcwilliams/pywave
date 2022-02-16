@@ -27,7 +27,6 @@ class Medium:
         self.set_operators()
         self.set_edge_operators()
 
-
     def set_limits(self, xlim):
         """
         Set limits of domain and characterise as semi-infinite/infinite/finite
@@ -48,7 +47,6 @@ class Medium:
             self.semi_infinite = not np.all(np.isfinite(xlim))
         assert(self.xlim[0] < self.xlim[1])
         assert(len(self.xlim) == 2)
-        
     
     def solve_disprel(self):
         """
@@ -65,7 +63,6 @@ class Medium:
         raise NotImplementedError(
                 "solve_disprel should be implemented in child class")
 
-
     def set_operators(self):
         """
         set common operators for convenience or to be used by Medium.set_edge_operators
@@ -76,7 +73,6 @@ class Medium:
         """
         self.operators = {}
 
-
     def set_edge_operators(self):
         """
         set edge operators to be used by Medium.solve
@@ -86,7 +82,6 @@ class Medium:
         self.edge_operators
         """
         self.edge_operators = {}
-
 
     @property
     def omega(self):
@@ -112,7 +107,6 @@ class Medium:
         """
         return len(self.k)
 
-    
     @property
     def phase_matrix(self):
         """
@@ -125,7 +119,6 @@ class Medium:
         width = self.xlim[1] - self.xlim[0]
         if np.isfinite(width):
             return np.diag(np.exp(_ZI*width*self.k))
-
 
     def get_new(self, xlim=None):
         """ get new class instance with same parameters but different spatial limits
@@ -146,7 +139,6 @@ class Medium:
                 setattr(new, k, v)
         new.set_limits(xlim)
         return new
-    
 
     def is_in_domain(self, x):
         """
@@ -162,7 +154,6 @@ class Medium:
         x0, x1 = self.xlim
         return (x>=x0) * (x<=x1)
 
-    
     def get_expansion(self, x, a0, a1, operator=None):
         """
         Calculate a displacement profile
@@ -204,7 +195,6 @@ class Medium:
         u[b] += np.exp(_ZI*np.outer(x1 - xb, self.k)).dot(c1).flatten()
         return u
 
-
     def get_matrices_forcings_1op(self, op, on_left):
 
         """
@@ -220,7 +210,6 @@ class Medium:
         else:
             forcings = med_factor * row_m # e^{-ikx} forcing
         return matrices, forcings
-
 
     def get_matrices_forcings_1pair(self, name, on_left, is_continuous):
         matrices = []
