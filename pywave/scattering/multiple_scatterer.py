@@ -211,6 +211,8 @@ class MultipleScatterer(ScattererBase):
 
     def get_energy_info(self, inc_amps=None):
         """
+        Get info about distribution of energy in the full scattering region
+
         Returns:
         --------
         energy_info : dict(numpy.ndarray)
