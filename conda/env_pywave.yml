@@ -21,5 +21,6 @@ dependencies:
  - scikit-image
  - scikit-learn
  - scipy
+ - sympy
  - pip:
    - celluloid
