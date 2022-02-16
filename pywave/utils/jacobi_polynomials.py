@@ -41,7 +41,6 @@ class JacobiPolynomials:
         self.a = a
         self.b = b
 
-    
     def get_norms(self):
         """
         Returns:
@@ -60,7 +59,6 @@ class JacobiPolynomials:
             hm[n] = fac1*hm[n-1]/fac2
         return hm
     
-
     def get_polys(self, x):
         '''
         evaluate polynomials at given x
@@ -91,7 +89,6 @@ class JacobiPolynomials:
             polys[:,n] = ( (r2n + r3n * t) * polys[:,n-1] - r4n * polys[:,n-2] )/r1n;
         return polys
 
-
     def quad_points_weights(self, num_points=None):
         """
         Returns:
@@ -116,7 +113,6 @@ class JacobiPolynomials:
         hm = self.get_norms()
         return self.a + delta * (1+t), fac * w, fac * hm
 
-
     def get_inner_product_matrix(self, xwh=None):
         '''
         evaluate polys at quad points
@@ -135,7 +131,6 @@ class JacobiPolynomials:
         mat = np.diag(1/hm).dot(pn.T)
         return mat.dot(np.diag(w))
  
-        
     def get_coeffs(self, f, xwh=None):
         '''
         Parameters:
@@ -155,7 +150,6 @@ class JacobiPolynomials:
         mat = np.diag(1/hm).dot(pn.T)
         return mat.dot(w*f)
 
-
     def get_derivatives_factors(self):
         '''
         Returns:
@@ -173,7 +167,6 @@ class JacobiPolynomials:
         jp = JacobiPolynomials(alpha=self.alpha + 1, beta=self.beta + 1,
                                a=self.a, b=self.b, max_degree=self.max_degree - 1)
         return jp, factors
-
 
     def get_derivatives(self, x):
         '''
@@ -193,7 +186,6 @@ class JacobiPolynomials:
         dpn = np.zeros((len(x), self.max_degree +1))
         dpn[:, 1:self.max_degree + 1] = jp.get_polys(x).dot(np.diag(factors))
         return dpn
-
 
     def num_quad_points_exp(self, kappa, z_int):
         """
@@ -222,7 +214,6 @@ class JacobiPolynomials:
         kr = np.max(kappa.real)
         nr = 5*ki*(z1-z0)
         return np.max([ni,nr,self.max_degree+1])
-
 
     def inner_prod_cosh_basis(self, kappa, z_int,
             xwh=None, num_points=None):
