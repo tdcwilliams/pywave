@@ -34,6 +34,7 @@ class ExtendedShallowWater(Helmholtz1D, OpenWaterBase):
         super().__init__(helmholtz_coef=self.beta,
                 k = np.sqrt(self.wave_number_ow_id/(self.beta*self.depth)),
                 xlim=xlim)
+        assert(self.beta > 0)
 
     @property
     def wave_number_ow_id(self):

@@ -1,4 +1,5 @@
 import numpy as np
+from collections import defaultdict
 
 from pywave.scattering.scatterer_base import ScattererBase
 
@@ -236,8 +237,8 @@ class MultipleScatterer(ScattererBase):
             energy_info["x"] += [x1]
             energy_info["cg"] += [med.group_velocity]
 
-            a0, a1 = self.get_solution_params(i+1, ip, im)
-            ep, em = med.get_energies(a0, a1)
+            coefs = self.get_solution_params(i+1, ip, im)
+            ep, em = med.get_energies(**coefs)
             energy_info["ep"] += [ep]
             energy_info["em"] += [em]
         return {k : np.array(v) for k,v in energy_info.items()}
