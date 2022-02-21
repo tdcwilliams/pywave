@@ -260,8 +260,11 @@ class Medium:
 
         Returns:
         --------
-        flux : float
-            net energy flux to the left
+        flux0 : float
+            energy flux to the right (<0)
+        flux1 : float
+            energy flux to the left (>0)
         """
+        cg = self.group_velocity
         e0, e1 = self.get_energies(a0, a1)
-        return self.group_velocity * (e1 - e0)
+        return - cg * e0, cg * e1

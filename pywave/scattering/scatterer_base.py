@@ -65,17 +65,6 @@ class ScattererBase:
         return self.media[0].omega
 
     @property
-    def intrinsic_admittance(self):
-        """
-        Returns:
-        --------
-        intrinsic_admittance : float
-            coefficient \alpha in the conservation of energy equation
-        """
-        raise NotImplementedError(
-                "Implement intrinsic_admittance in child class")
-
-    @property
     def xlim(self):
         """
         Returns:
@@ -149,9 +138,12 @@ class ScattererBase:
         def run_flux_test(from_left):
             # test energy flux to left and right hand scatterers is the same
             ip, im = self.get_simple_inputs(from_left)
-            pl, pr = [self.media[i].get_energy_flux(
-                    **self.get_solution_params(i, ip, im))
-                    for i in range(2)]
+            net_flux = []
+            for i in [0,-1]:
+                f0, f1 = self.media[i].get_energy_flux(
+                        **self.get_solution_params(i, ip, im))
+                net_flux += [f0 + f1]
+            pl, pr = net_flux
             print(f'Test energy flux, from_left={from_left}:')
             print(f'\t{pl}, {pr}')
             assert(np.allclose([pl], [pr]))
@@ -159,17 +151,6 @@ class ScattererBase:
 
         for from_left in [True, False]:
             run_flux_test(from_left)
-
-    def test_energy(self):
-        """
-        Test energy is conserved
-        """
-        alp = self.intrinsic_admittance
-        e = np.abs(self.Rp[0,0])**2 + alp*np.abs(self.Tp[0,0])**2
-        assert(np.abs(e-1) < 1e-8)
-        e = np.abs(self.Rm[0,0])**2 + np.abs(self.Tm[0,0])**2/alp
-        assert(np.abs(e-1) < 1e-8)
-        print('Energy is OK')    
 
     def test_boundary_conditions(self, inc_amps=None):
         """
