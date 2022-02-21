@@ -38,16 +38,6 @@ class ExtendedShallowWater(Helmholtz1D, OpenWaterBase):
         assert(beta > 0)
 
     @property
-    def wave_number_ow_id(self):
-        """
-        Returns:
-        --------
-        alpha : float
-            infinite depth wave number for open water (omega^2/g)
-        """
-        return self.omega**2/self.gravity
-
-    @property
     def beta(self):
         """
         Returns:

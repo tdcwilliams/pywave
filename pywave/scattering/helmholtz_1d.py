@@ -118,5 +118,5 @@ class Helmholtz1D(Medium):
         e1 : float
             energy travelling to the left
         """
-        fac = .5 *self.helmholtz_coef * self.k[0]**2
-        return [fac*np.abs(a)**2 for a in (a0,a1)]
+        fac = .5 * self.helmholtz_coef * self.k[0]**2
+        return [fac*np.abs(a)**2 for a in (a0, a1)]

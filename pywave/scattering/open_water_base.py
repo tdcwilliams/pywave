@@ -39,3 +39,24 @@ class OpenWaterBase(Medium):
             infinite depth wave number for open water (omega^2/g)
         """
         return self.omega**2/self.gravity
+
+    def get_energies(self, a0, a1):
+        """
+        Determine the energies travelling in each direction
+
+        Parameters:
+        -----------
+        a0 : numpy.ndarray
+            coeffients of the waves travelling to the right
+        a1 : numpy.ndarray
+            coeffients of the waves travelling to the left
+
+        Returns:
+        --------
+        e0 : float
+            energy travelling to the right
+        e1 : float
+            energy travelling to the left
+        """
+        fac = .5 * self.rho_water * self.gravity
+        return [fac*np.abs(a)**2 for a in (a0, a1)]
