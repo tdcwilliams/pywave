@@ -8,7 +8,10 @@ _ZI = np.complex(0, 1)
 class Helmholtz1DBoundary(MediumBoundary):
     """
     Class for scatterer that is a sharp boundary between 2 media
-    that satisfy the 1D Helmholtz equation
+    that satisfy the 1D Helmholtz equation. Due to their simplicity
+    some of the methods of MediumBoundary are duplicated here
+    (solve, test_boundary_conditions).
+    This is useful for testing purposes.
     """
     
     def solve(self):
