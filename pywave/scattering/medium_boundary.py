@@ -6,12 +6,10 @@ _ZI = np.complex(0, 1)
 
 
 class MediumBoundary(ScattererBase):
+    """ Class for scatterer that is a sharp boundary between 2 media """
     
     def __init__(self, lhs, rhs, position=0, condition_types=None):
         """
-        Base scatterer class.
-        Default calculates the scattering by a change in properties
-        
         Parameters:
         -----------
         lhs : Medium or subclass
@@ -128,7 +126,7 @@ class MediumBoundary(ScattererBase):
                 forcing[n_eqns+n,slices[n]] = -op1(med_factor*med.k)
                 n_eqns += 1
 
-        assert(n_eqns==nrows)
+        assert(n_eqns == nrows)
         return matrix, forcing
 
     def solve(self):

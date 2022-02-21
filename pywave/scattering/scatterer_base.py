@@ -6,6 +6,7 @@ _ZI = np.complex(0, 1)
 
 
 class ScattererBase:
+    """ Class for generic scatterer """
 
     def __init__(self, media):
         """
@@ -71,8 +72,8 @@ class ScattererBase:
         intrinsic_admittance : float
             coefficient \alpha in the conservation of energy equation
         """
-        cc = [self.media[i].k[0]*self.media[i].kappa for i in [0,-1]]
-        return cc[-1]/cc[0]
+        raise NotImplementedError(
+                "Implement intrinsic_admittance in child class")
 
     @property
     def xlim(self):
@@ -174,20 +175,8 @@ class ScattererBase:
         """
         Test boundary conditions are satisfied
         """
-        if inc_amps is None:
-             inc_amps = np.array([1]), np.array([0.5])
-        ip, im = inc_amps
-        sp = self.get_solution_params(0, ip, im)['a1']
-        sm = self.get_solution_params(-1, ip, im)['a0']
-        u_m = ip.sum() + sp.sum() #U(0^+)
-        u_p = im.sum() + sm.sum() #U(0^-)
-        sig_m = _ZI*self.media[0].kappa*self.media[0].k.dot(ip - sp)
-        sig_p = _ZI*self.media[-1].kappa*self.media[-1].k.dot(sm - im)
-        print(f"u(0) = {u_m} = {u_p}")
-        print(f"\sigma(0) = {sig_m} = {sig_p}")
-        assert(np.abs(u_m - u_p) < 1e-8)
-        assert(np.abs(sig_m - sig_p) < 1e-8)
-        print("Boundary conditions are OK")
+        raise NotImplementedError(
+                "Implement test_boundary_conditions in child class")
 
     def get_expansion(self, x, inc_amps=None, get_disp=True):
         """

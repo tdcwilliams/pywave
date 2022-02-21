@@ -56,9 +56,6 @@ class Medium:
         Sets:
         --------
         self.k : numpy.ndarray(float)
-            vector of wave numbers (1/m)
-            satisfies
-                alpha - kappa*k^2 = 0
         """
         raise NotImplementedError(
                 "solve_disprel should be implemented in child class")

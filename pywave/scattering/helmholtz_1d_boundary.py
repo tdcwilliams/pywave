@@ -6,6 +6,10 @@ _ZI = np.complex(0, 1)
 
 
 class Helmholtz1DBoundary(MediumBoundary):
+    """
+    Class for scatterer that is a sharp boundary between 2 media
+    that satisfy the 1D Helmholtz equation
+    """
     
     def solve(self):
         """
@@ -29,6 +33,17 @@ class Helmholtz1DBoundary(MediumBoundary):
         self.Tm = fac*np.array([[2*kk1]])
         self.Tp = fac*np.array([[2*kk0]])
         self.Rm = fac*np.array([[kk1-kk0]])
+
+    @property
+    def intrinsic_admittance(self):
+        """
+        Returns:
+        --------
+        intrinsic_admittance : float
+            coefficient \alpha in the conservation of energy equation
+        """
+        cc = [self.media[i].k[0]*self.media[i].helmholtz_coef for i in [0,-1]]
+        return cc[-1]/cc[0]
 
     def test_boundary_conditions(self, inc_amps=None):
         """
