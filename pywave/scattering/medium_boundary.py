@@ -26,6 +26,17 @@ class MediumBoundary(ScattererBase):
             ])
         self.set_condition_types(condition_types=condition_types)
 
+    @property
+    def intrinsic_admittance(self):
+         """
+         Returns:
+         --------
+         intrinsic_admittance : float
+             coefficient \alpha in the conservation of energy equation
+         """
+         raise NotImplementedError(
+                 "Implement intrinsic_admittance in child class")
+
     def sort_edge_operators(self):
         """
         Returns:
@@ -155,6 +166,17 @@ class MediumBoundary(ScattererBase):
         self.Tm = unknowns[:nk0, nk0:] #transmitted from right
         self.Tp = unknowns[nk0:, :nk0] #transmitted from left
         self.Rm = unknowns[nk0:, nk0:] #reflected from right
+
+    def test_energy(self):
+        """
+        Test energy is conserved
+        """
+        alp = self.intrinsic_admittance
+        e = np.abs(self.Rp[0,0])**2 + alp*np.abs(self.Tp[0,0])**2
+        assert(np.abs(e-1) < 1e-8)
+        e = np.abs(self.Rm[0,0])**2 + np.abs(self.Tm[0,0])**2/alp
+        assert(np.abs(e-1) < 1e-8)
+        print('Energy is OK')
 
     def test_boundary_conditions(self, inc_amps=None):
         """

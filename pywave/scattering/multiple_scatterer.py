@@ -230,13 +230,14 @@ class MultipleScatterer(ScattererBase):
         if inc_amps is None:
             inc_amps = self.get_simple_inputs()
         ip, im = inc_amps
+
         energy_info = defaultdict(list)
         for i, med in enumerate(self.interior_media):
             x0, x1 = med.xlim
             if i == 0: energy_info["x"] += [x0]
             energy_info["x"] += [x1]
-            energy_info["cg"] += [med.group_velocity]
 
+            energy_info["cg"] += [med.group_velocity]
             coefs = self.get_solution_params(i+1, ip, im)
             ep, em = med.get_energies(**coefs)
             energy_info["ep"] += [ep]
