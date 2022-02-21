@@ -160,5 +160,5 @@ class MediumBoundary(ScattererBase):
         """
         Test boundary conditions are satisfied
         """
-        raise NotImplementedError(
-                "test_boundary_conditions method needs to be implemented in child classes")
+        # TODO implement generic test
+        raise NotImplementedError
