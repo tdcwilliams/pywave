@@ -17,7 +17,7 @@ class Helmholtz1D(Medium):
         Parameters:
         -----------
         helmholtz_coef : float
-            Coefficient in front of u_xxstring stiffness.
+            Coefficient in front of u_xx.
             For an elastic string this is the stiffness.
         k : float
             wave number
