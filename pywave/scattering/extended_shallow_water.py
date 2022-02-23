@@ -32,10 +32,11 @@ class ExtendedShallowWater(Helmholtz1D, OpenWaterBase):
         """
         OpenWaterBase.__init__(self, **kwargs)
         beta = self.beta
-        super().__init__(helmholtz_coef=beta,
+        assert(beta > 0)
+        super().__init__(
+                helmholtz_coef=self.rho_water * self.gravity * beta,
                 k = np.sqrt(self.wave_number_ow_id/(beta * self.depth)),
                 xlim=xlim)
-        assert(beta > 0)
 
     @property
     def beta(self):
@@ -66,7 +67,9 @@ class ExtendedShallowWater(Helmholtz1D, OpenWaterBase):
         -----
         self.operators
         """
-        super().set_operators() # q=hU is helmholtz_u
-        self.operators['displacement'] = lambda k : -_ZI*k
+        super().set_operators()
+        # q = hU is helmholtz_u with U the horizontal displacement
         self.operators['horizontal_velocity'] = (
                 lambda k : (-_ZI*self.omega)/self.depth)
+        # eta = -q_x, with eta the vertical displacement at the surface
+        self.operators['displacement'] = lambda k : -_ZI*k

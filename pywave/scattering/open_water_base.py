@@ -59,4 +59,5 @@ class OpenWaterBase(Medium):
             energy travelling to the left
         """
         fac = .5 * self.rho_water * self.gravity
-        return [fac*np.abs(a)**2 for a in (a0, a1)]
+        fk = self.operators["displacement"](self.k[0])
+        return [fac*np.abs(fk * a)**2 for a in (a0, a1)]
