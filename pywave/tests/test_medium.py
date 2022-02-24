@@ -146,6 +146,29 @@ class MediumTest(PywaveTestBase):
             np.diag(np.exp(_ZI*w*med.k)),
             ))
 
+    @patch.multiple(Medium,
+            solve_disprel=DEFAULT,
+            set_operators=DEFAULT,
+            set_edge_operators=DEFAULT,
+            )
+    def test_get_new(self, **kwargs):
+        """ test phase_matrix """
+        xlim = np.array([0.,1.])
+        med = Medium(xlim=xlim)
+        atts = vars(med)
+        del atts['xlim']
+
+        xlim2 = xlim + 1.
+        med2 = med.get_new(xlim2)
+        self.assertTrue(np.allclose(med2.xlim, xlim2))
+        atts2 = vars(med2)
+        del atts2['xlim']
+        self.assertEqual(atts, atts2)
+
+        kwargs['solve_disprel'].assert_called_once_with()
+        kwargs['set_operators'].assert_called_once_with()
+        kwargs['set_edge_operators'].assert_called_once_with()
+
     @patch.multiple(Medium, __init__=MagicMock(return_value=None))
     def test_get_energies(self, **kwargs):
         """ test error raised for get_energies """
