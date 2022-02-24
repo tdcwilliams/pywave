@@ -25,6 +25,64 @@ class MediumTest(PywaveTestBase):
 
     @patch.multiple(Medium,
             __init__=MagicMock(return_value=None),
+            )
+    def test_set_limits(self):
+        """ test phase_velocity """
+        med = Medium()
+
+        # default (infinite)
+        xlim = [-np.inf, np.inf]
+        med.set_limits(None)
+        self.assertTrue(med.infinite)
+        self.assertFalse(med.semi_infinite)
+        self.assertIsInstance(med.xlim, np.ndarray)
+        self.assertEqual(list(med.xlim), xlim)
+
+        # infinite
+        med.set_limits(xlim)
+        self.assertTrue(med.infinite)
+        self.assertFalse(med.semi_infinite)
+        self.assertIsInstance(med.xlim, np.ndarray)
+        self.assertEqual(list(med.xlim), xlim)
+
+        # semi-infinite (1)
+        xlim = [-np.inf, 0]
+        med.set_limits(xlim)
+        self.assertFalse(med.infinite)
+        self.assertTrue(med.semi_infinite)
+        self.assertIsInstance(med.xlim, np.ndarray)
+        self.assertEqual(list(med.xlim), xlim)
+
+        # semi-infinite (2)
+        xlim = [0, np.inf]
+        med.set_limits(xlim)
+        self.assertFalse(med.infinite)
+        self.assertTrue(med.semi_infinite)
+        self.assertIsInstance(med.xlim, np.ndarray)
+        self.assertEqual(list(med.xlim), xlim)
+
+        # finite (1)
+        xlim = [0, 1.]
+        med.set_limits(xlim)
+        self.assertFalse(med.infinite)
+        self.assertFalse(med.semi_infinite)
+        self.assertIsInstance(med.xlim, np.ndarray)
+        self.assertEqual(list(med.xlim), xlim)
+
+        # finite (2): error
+        xlim = [2, 1.]
+        with self.assertRaises(AssertionError):
+            med.set_limits(xlim)
+
+    @patch.multiple(Medium, __init__=MagicMock(return_value=None))
+    def test_solve_disprel(self, **kwargs):
+        """ test error raised for solve_disprel """
+        med = Medium()
+        with self.assertRaises(NotImplementedError):
+            med.solve_disprel()
+
+    @patch.multiple(Medium,
+            __init__=MagicMock(return_value=None),
             omega=DEFAULT,
             )
     def test_phase_velocity(self, **kwargs):
