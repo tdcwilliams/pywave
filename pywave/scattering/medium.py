@@ -1,5 +1,6 @@
 import numpy as np
 
+
 _ZI = np.complex(0, 1)
 
 
@@ -109,15 +110,14 @@ class Medium:
     def group_velocity(self):
         """
         Return group velocity
-        - default is for a non-dispersive material
-          ie same as phase velocity
 
         Returns:
         --------
         cg : float
             group velocity = d\omega/dk
         """
-        return self.phase_velocity
+        raise NotImplementedError(
+                "Implement group_velocity in subclasses")
 
     @property
     def num_modes(self):
@@ -239,10 +239,31 @@ class Medium:
         op1, op2 = self.edge_operators[name]
         ops = (op1, op2) if is_continuous else (op1)
         for op in ops:
-            m, f = med.get_matrices_forcings_1op(op, on_left)
+            m, f = self.get_matrices_forcings_1op(op, on_left)
             matrices += [m]
             forcings += [f]
         return np.vstack(mats), np.vstack(forcings)
+
+    def get_energies(self, a0, a1):
+        """
+        Determine the energies travelling in each direction
+
+        Parameters:
+        -----------
+        a0 : numpy.ndarray
+            coeffients of the waves travelling to the right
+        a1 : numpy.ndarray
+            coeffients of the waves travelling to the left
+
+        Returns:
+        --------
+        e0 : float
+            energy travelling to the right
+        e1 : float
+            energy travelling to the left
+        """
+        raise NotImplementedError(
+                "Implement get_energies in subclasses")
 
     def get_energy_flux(self, a0, a1):
         """
@@ -267,4 +288,4 @@ class Medium:
         """
         cg = self.group_velocity
         e0, e1 = self.get_energies(a0, a1)
-        return - cg * e0, cg * e1
+        return -cg * e0, cg * e1

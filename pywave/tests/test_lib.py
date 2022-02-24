@@ -3,10 +3,11 @@ from mock import patch, call, MagicMock
 
 import numpy as np
 
+from pywave.tests.pywave_test_base import PywaveTestBase
 from pywave.utils import lib
 
 
-class TestLib(unittest.TestCase):
+class LibTest(PywaveTestBase):
 
     def test_vector_min(self):
 
