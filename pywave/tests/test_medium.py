@@ -81,6 +81,20 @@ class MediumTest(PywaveTestBase):
         with self.assertRaises(NotImplementedError):
             med.solve_disprel()
 
+    @patch.multiple(Medium, __init__=MagicMock(return_value=None))
+    def test_set_operators(self, **kwargs):
+        """ test error raised for set_operators """
+        med = Medium()
+        med.set_operators()
+        self.assertEqual(med.operators, {})
+
+    @patch.multiple(Medium, __init__=MagicMock(return_value=None))
+    def test_set_edge_operators(self, **kwargs):
+        """ test error raised for set_edge_operators """
+        med = Medium()
+        med.set_edge_operators()
+        self.assertEqual(med.edge_operators, {})
+
     @patch.multiple(Medium,
             __init__=MagicMock(return_value=None),
             omega=DEFAULT,
