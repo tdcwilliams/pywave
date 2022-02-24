@@ -9,6 +9,21 @@ from pywave.scattering.medium import Medium
 
 class MediumTest(PywaveTestBase):
 
+    @patch.multiple(Medium, __init__=MagicMock(return_value=None))
+    def test_group_velocity(self, **kwargs):
+        """ test error raised for group_velocity """
+        med = Medium()
+        with self.assertRaises(NotImplementedError):
+            med.group_velocity
+
+    @patch.multiple(Medium, __init__=MagicMock(return_value=None))
+    def test_get_energies(self, **kwargs):
+        """ test error raised for get_energies """
+        a0, a1 = np.array([[2.], [3.]])
+        med = Medium()
+        with self.assertRaises(NotImplementedError):
+            med.get_energies(a0, a1)
+
     @patch.multiple(Medium,
             __init__=MagicMock(return_value=None),
             group_velocity=DEFAULT,
