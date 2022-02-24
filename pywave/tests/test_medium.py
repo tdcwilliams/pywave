@@ -97,7 +97,6 @@ class MediumTest(PywaveTestBase):
 
     @patch.multiple(Medium,
             __init__=MagicMock(return_value=None),
-            omega=DEFAULT,
             )
     def test_omega(self, **kwargs):
         """ test omega """
