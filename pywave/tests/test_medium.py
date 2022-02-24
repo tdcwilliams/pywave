@@ -9,6 +9,31 @@ from pywave.scattering.medium import Medium
 
 class MediumTest(PywaveTestBase):
 
+    @patch.multiple(Medium,
+            set_limits=DEFAULT,
+            solve_disprel=DEFAULT,
+            set_operators=DEFAULT,
+            set_edge_operators=DEFAULT,
+            )
+    def test_init(self, **kwargs):
+        """ test phase_velocity """
+        med = Medium(xlim='xlim')
+        kwargs['set_limits'].assert_called_once_with('xlim')
+        kwargs['solve_disprel'].assert_called_once_with()
+        kwargs['set_operators'].assert_called_once_with()
+        kwargs['set_edge_operators'].assert_called_once_with()
+
+    @patch.multiple(Medium,
+            __init__=MagicMock(return_value=None),
+            omega=DEFAULT,
+            )
+    def test_phase_velocity(self, **kwargs):
+        """ test phase_velocity """
+        med = Medium()
+        med.omega = 3
+        med.k = np.array([2.,3.])
+        self.assertEqual(med.phase_velocity, 1.5)
+
     @patch.multiple(Medium, __init__=MagicMock(return_value=None))
     def test_group_velocity(self, **kwargs):
         """ test error raised for group_velocity """
