@@ -4,7 +4,7 @@ from mock import patch, call, MagicMock, DEFAULT
 import numpy as np
 
 from pywave.tests.pywave_test_base import PywaveTestBase
-from pywave.scattering.medium import Medium
+from pywave.scattering.medium import Medium, _ZI
 
 
 class MediumTest(PywaveTestBase):
@@ -75,21 +75,21 @@ class MediumTest(PywaveTestBase):
             med.set_limits(xlim)
 
     @patch.multiple(Medium, __init__=MagicMock(return_value=None))
-    def test_solve_disprel(self, **kwargs):
+    def test_solve_disprel(self):
         """ test error raised for solve_disprel """
         med = Medium()
         with self.assertRaises(NotImplementedError):
             med.solve_disprel()
 
     @patch.multiple(Medium, __init__=MagicMock(return_value=None))
-    def test_set_operators(self, **kwargs):
+    def test_set_operators(self):
         """ test set_operators """
         med = Medium()
         med.set_operators()
         self.assertEqual(med.operators, {})
 
     @patch.multiple(Medium, __init__=MagicMock(return_value=None))
-    def test_set_edge_operators(self, **kwargs):
+    def test_set_edge_operators(self):
         """ test set_edge_operators """
         med = Medium()
         med.set_edge_operators()
@@ -98,7 +98,7 @@ class MediumTest(PywaveTestBase):
     @patch.multiple(Medium,
             __init__=MagicMock(return_value=None),
             )
-    def test_omega(self, **kwargs):
+    def test_omega(self):
         """ test omega """
         med = Medium()
         med.period = 10.
@@ -116,11 +116,35 @@ class MediumTest(PywaveTestBase):
         self.assertEqual(med.phase_velocity, 1.5)
 
     @patch.multiple(Medium, __init__=MagicMock(return_value=None))
-    def test_group_velocity(self, **kwargs):
+    def test_group_velocity(self):
         """ test error raised for group_velocity """
         med = Medium()
         with self.assertRaises(NotImplementedError):
             med.group_velocity
+
+    @patch.multiple(Medium,
+            __init__=MagicMock(return_value=None),
+            )
+    def test_num_modes(self, **kwargs):
+        """ test num_modes """
+        med = Medium()
+        n = 10
+        med.k = np.random.normal(size=(n,))
+        self.assertEqual(med.num_modes, n)
+
+    @patch.multiple(Medium,
+            __init__=MagicMock(return_value=None),
+            )
+    def test_phase_matrix(self, **kwargs):
+        """ test phase_matrix """
+        med = Medium()
+        w = 10.
+        med.xlim = [1., 1+w]
+        med.k = np.random.uniform(size=(5,))
+        self.assertTrue(np.allclose(
+            med.phase_matrix,
+            np.diag(np.exp(_ZI*w*med.k)),
+            ))
 
     @patch.multiple(Medium, __init__=MagicMock(return_value=None))
     def test_get_energies(self, **kwargs):
