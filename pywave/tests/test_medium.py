@@ -170,6 +170,15 @@ class MediumTest(PywaveTestBase):
         kwargs['set_edge_operators'].assert_called_once_with()
 
     @patch.multiple(Medium, __init__=MagicMock(return_value=None))
+    def test_is_in_domain(self):
+        med = Medium()
+        med.xlim = np.array([2.,3])
+        x = [-np.inf, -5., 2., 2.5, 3., 5., np.inf]
+        y = np.array([False, False, True, True, True, False, False])
+        self.assertTrue(np.allclose(
+            med.is_in_domain(x), y))
+
+    @patch.multiple(Medium, __init__=MagicMock(return_value=None))
     def test_get_energies(self, **kwargs):
         """ test error raised for get_energies """
         a0, a1 = np.array([[2.], [3.]])
