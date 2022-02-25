@@ -176,6 +176,25 @@ class Medium:
         x0, x1 = self.xlim
         return (x>=x0) * (x<=x1)
 
+    @property
+    def x_scattering_src(self):
+        """
+        Returns:
+        --------
+        x_scattering_src : np.array(float)
+            [x0,x1] with:
+            - x0, x1 = self.xlim if both elements of self.xlim are finite
+            - x0 = x1 = 0 if self.infinite is True
+            - if self.semi_infinite is True, x0 = x1 = xf,
+              where xf is the finite element of self.xlim
+        """
+        x0, x1 = self.xlim
+        if self.infinite:
+            x0 = x1 = 0
+        if self.semi_infinite:
+            x0 = x1 = self.xlim[np.isfinite(self.xlim)]
+        return np.array([x0, x1])
+
     def get_expansion(self, x, a0, a1, operator=None):
         """
         Calculate a displacement profile
@@ -201,11 +220,7 @@ class Medium:
         u = np.full_like(x, np.nan, dtype=np.complex)
         b = self.is_in_domain(x)
         xb = x[b]
-        x0, x1 = self.xlim
-        if self.infinite:
-            x0 = x1 = 0
-        elif self.semi_infinite:
-            x0 = x1 = self.xlim[np.isfinite(self.xlim)]
+        x0, x1 = self.x_scattering_src
         if operator is None:
             operator = lambda x : 1
         elif isinstance(operator, str):

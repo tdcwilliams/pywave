@@ -178,6 +178,42 @@ class MediumTest(PywaveTestBase):
         self.assertTrue(np.allclose(
             med.is_in_domain(x), y))
 
+    @patch.multiple(Medium,
+            __init__=MagicMock(return_value=None),
+            )
+    def test_x_scattering_src(self):
+        """ test phase_velocity """
+        med = Medium()
+
+        # infinite
+        med.set_limits([-np.inf, np.inf])
+        self.assertEqual(list(med.x_scattering_src), [0,0])
+
+        # semi-infinite
+        med.set_limits([-np.inf, 1.])
+        self.assertEqual(list(med.x_scattering_src), [1.,1.])
+        med.set_limits([1., np.inf])
+        self.assertEqual(list(med.x_scattering_src), [1.,1.])
+
+        # finite
+        med.set_limits([.5, 1.])
+        self.assertEqual(list(med.x_scattering_src), [.5,1.])
+
+    #@patch.multiple(Medium, __init__=MagicMock(return_value=None))
+    #def test_get_expansion(self):
+    #    med = Medium()
+    #    med.get_expansion(x, a0, a1, operator=None):
+
+    #@patch.multiple(Medium, __init__=MagicMock(return_value=None))
+    #def get_matrices_forcings_1op(op, on_left):
+    #    med = Medium()
+    #    med.get_matrices_forcings_1op(op, on_left)
+
+    #@patch.multiple(Medium, __init__=MagicMock(return_value=None))
+    #def test_get_matrices_forcings_1pair(self):
+    #    med = Medium()
+    #    med.get_matrices_forcings_1pair(name, on_left, is_continuous)
+
     @patch.multiple(Medium, __init__=MagicMock(return_value=None))
     def test_get_energies(self, **kwargs):
         """ test error raised for get_energies """
