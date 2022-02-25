@@ -232,33 +232,6 @@ class Medium:
         u[b] += np.exp(_ZI*np.outer(x1 - xb, self.k)).dot(c1).flatten()
         return u
 
-    def get_matrices_forcings_1op(self, op, on_left):
-
-        """
-        1st half of matrix columns: "e^{ikx}" eigen functions
-        2nd half of matrix columns: "e^{-ikx}" eigen functions
-        """
-        row_p = op( self.k).reshape(1,-1)
-        row_m = op(-self.k).reshape(1,-1)
-        med_factor = {True: -1, False: 1}[on_left]
-        matrices = med_factor * np.hstack([row_p, row_m])
-        if on_left:
-            forcings = med_factor * row_p # e^{ikx} forcing
-        else:
-            forcings = med_factor * row_m # e^{-ikx} forcing
-        return matrices, forcings
-
-    def get_matrices_forcings_1pair(self, name, on_left, is_continuous):
-        matrices = []
-        forcings = []
-        op1, op2 = self.edge_operators[name]
-        ops = (op1, op2) if is_continuous else (op1)
-        for op in ops:
-            m, f = self.get_matrices_forcings_1op(op, on_left)
-            matrices += [m]
-            forcings += [f]
-        return np.vstack(mats), np.vstack(forcings)
-
     def get_energies(self, a0, a1):
         """
         Determine the energies travelling in each direction

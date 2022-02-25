@@ -204,16 +204,6 @@ class MediumTest(PywaveTestBase):
     #    med = Medium()
     #    med.get_expansion(x, a0, a1, operator=None):
 
-    #@patch.multiple(Medium, __init__=MagicMock(return_value=None))
-    #def get_matrices_forcings_1op(op, on_left):
-    #    med = Medium()
-    #    med.get_matrices_forcings_1op(op, on_left)
-
-    #@patch.multiple(Medium, __init__=MagicMock(return_value=None))
-    #def test_get_matrices_forcings_1pair(self):
-    #    med = Medium()
-    #    med.get_matrices_forcings_1pair(name, on_left, is_continuous)
-
     @patch.multiple(Medium, __init__=MagicMock(return_value=None))
     def test_get_energies(self, **kwargs):
         """ test error raised for get_energies """
