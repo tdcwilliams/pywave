@@ -199,10 +199,66 @@ class MediumTest(PywaveTestBase):
         med.set_limits([.5, 1.])
         self.assertEqual(list(med.x_scattering_src), [.5,1.])
 
-    #@patch.multiple(Medium, __init__=MagicMock(return_value=None))
-    #def test_get_expansion(self):
-    #    med = Medium()
-    #    med.get_expansion(x, a0, a1, operator=None):
+    @patch.multiple(Medium,
+            __init__=MagicMock(return_value=None),
+            x_scattering_src=DEFAULT,
+            is_in_domain=DEFAULT,
+            )
+    def test_get_expansion_1(self, **kwargs):
+        """ test with default operator"""
+        x0 = -.5
+        x1 = .5
+        a0 = np.array([1., 1+_ZI])
+        a1 = np.array([2., 2+_ZI])
+        k = np.array([1., 1+_ZI])
+        x = np.linspace(-.5, .5, 10)
+        y = 0
+        for i in range(2):
+            y += a0[i]*np.exp(_ZI*k[i]*(x-x0))
+            y += a1[i]*np.exp(_ZI*k[i]*(x1-x))
+
+        x = np.array([-1., *x, 1.])
+        b = np.ones_like(x, dtype=bool)
+        b[0] = b[-1] = False
+        kwargs['is_in_domain'].return_value = b
+        med = Medium()
+        med.x_scattering_src = np.array([x0, x1])
+        med.k = k
+        y2 =med.get_expansion(x, a0, a1)
+        self.assertTrue(np.allclose(y, y2[1:-1]))
+        for i in [0,-1]:
+            self.assertTrue(np.isnan(y2[i]))
+
+    @patch.multiple(Medium,
+            __init__=MagicMock(return_value=None),
+            x_scattering_src=DEFAULT,
+            is_in_domain=DEFAULT,
+            )
+    def test_get_expansion_2(self, **kwargs):
+        """ test with custom operator"""
+        x0 = -.5
+        x1 = .5
+        a0 = np.array([1., 1+_ZI])
+        a1 = np.array([2., 2+_ZI])
+        k = np.array([1., 1+_ZI])
+        op = lambda x : x**2 - x**3
+        x = np.linspace(-.5, .5, 10)
+        y = 0
+        for i in range(2):
+            y += a0[i]*op( k[i])*np.exp(_ZI*k[i]*(x-x0))
+            y += a1[i]*op(-k[i])*np.exp(_ZI*k[i]*(x1-x))
+
+        x = np.array([-1., *x, 1.])
+        b = np.ones_like(x, dtype=bool)
+        b[0] = b[-1] = False
+        kwargs['is_in_domain'].return_value = b
+        med = Medium()
+        med.x_scattering_src = np.array([x0, x1])
+        med.k = k
+        y2 =med.get_expansion(x, a0, a1, operator=op)
+        self.assertTrue(np.allclose(y, y2[1:-1]))
+        for i in [0,-1]:
+            self.assertTrue(np.isnan(y2[i]))
 
     @patch.multiple(Medium, __init__=MagicMock(return_value=None))
     def test_get_energies(self, **kwargs):
