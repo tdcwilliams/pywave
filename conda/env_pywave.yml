@@ -2,25 +2,25 @@ name: pywave
 channels:
   - conda-forge
 dependencies:
+ - cython
  - ipdb
  - ipython
- - jedi=0.17.2
  - jupyter
- - matplotlib
- - mock
- - netcdf4
- - netcdftime
- - nose
  - notebook
- - numpy
- - pandas
- - pillow
  - pip
  - python=3.9
- - pyyaml
- - scikit-image
- - scikit-learn
- - scipy
- - sympy
  - pip:
    - celluloid
+   - matplotlib
+   - mock
+   - netcdf4
+   - netcdftime
+   - nose
+   - numpy
+   - pandas
+   - pillow
+   - pyyaml
+   - scikit-image
+   - scikit-learn
+   - scipy
+   - sympy
