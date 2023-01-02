@@ -33,8 +33,9 @@ RUN apt-get update \
 && rm -rf /var/lib/apt/lists/*
 
 # Python packages
+# TODO change to conda to get later python
 WORKDIR /tmp
-RUN wget https://bootstrap.pypa.io/get-pip.py \
+RUN wget https://bootstrap.pypa.io/pip/3.6/get-pip.py \
 &&  python3 get-pip.py \
 &&  pip install --upgrade pip
 RUN pip install \
