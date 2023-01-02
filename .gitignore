@@ -130,4 +130,5 @@ dmypy.json
 
 # CUSTOM:
 .*.sw?
+out
 figs
