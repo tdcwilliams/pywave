@@ -1,7 +1,7 @@
 # Docker usage
 Build the docker images with:
 ```
-build . -t pywave
+docker build . -t pywave
 ```
 Build container with (eg.):
 ```
